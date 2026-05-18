@@ -4,8 +4,8 @@ services:
   # Django services
   web:
     build: 
-    contecxt: .
-    target: runtime
+      context: .
+      target: runtime
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
@@ -17,20 +17,19 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/mediadb
     depends_on:
       - db
-# DATABASE postgressSQL services
 
-db:
-  image: postgres:16-alpine
-  volumes:
-    - postgres_dev_data:/var/lib/postgresql/data
-  environment:
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=postgres
-    - POSTGRES_DB=mediadb
-  ports:
-    - "5433:5432"
+  # DATABASE postgressSQL services
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mediadb
+    ports:
+      - "5433:5432"
 
 # Volumes for persistence
 volumes:
   postgres_dev_data:
-  
