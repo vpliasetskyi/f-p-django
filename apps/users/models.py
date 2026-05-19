@@ -3,8 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
     pass
-    # We use AbstractUser to future-proof the core relationships,
-    # and keep all other generic account fields on the Profile.
 
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
