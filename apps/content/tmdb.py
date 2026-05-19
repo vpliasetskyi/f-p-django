@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
-# API Key should be stored in settings.TMDB_API_KEY ideally, using a fallback for now.
+
 TMDB_API_KEY = getattr(settings, 'TMDB_API_KEY', '')
 
 def search_multi(query):
