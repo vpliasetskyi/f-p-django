@@ -1,0 +1,34 @@
+<nav class="fixed w-full z-50 top-0 transition-all duration-300 glass-panel border-b border-gray-800/50">
+    <div class="navbar max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex-1">
+            <a href="/" class="btn btn-ghost normal-case text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-tight hover:scale-105 transition-transform">
+                Cinemix
+            </a>
+        </div>
+        <div class="flex-none gap-4">
+            <div class="form-control hidden md:block relative group">
+                <input type="text" placeholder="Search movies, tv..." class="input input-bordered w-24 md:w-auto bg-gray-800/50 border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300 rounded-full px-6" />
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+            </div>
+            <div class="dropdown dropdown-end" x-data="{ open: false }" @click.away="open = false">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar ring-2 ring-transparent hover:ring-primary transition-all duration-300" @click="open = !open">
+                    <div class="w-10 rounded-full">
+                        <img alt="User Avatar" src="https://ui-avatars.com/api/?name=User&background=random" />
+                    </div>
+                </div>
+                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow-2xl menu menu-sm dropdown-content bg-gray-800 border border-gray-700 rounded-box w-52 glass-panel transform transition-all" x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" style="display: none;">
+                    <li>
+                        <a class="justify-between hover:text-primary transition-colors">
+                            Profile
+                            <span class="badge badge-primary badge-sm">New</span>
+                        </a>
+                    </li>
+                    <li><a class="hover:text-primary transition-colors">My Lists</a></li>
+                    <li><a class="hover:text-error transition-colors">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
