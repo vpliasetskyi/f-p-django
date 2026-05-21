@@ -9,12 +9,11 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
+      - /app/.venv
     ports:
       - "8000:8000"
-    environment:
-      - DEBUG=1
-      - SECRET_KEY=local_development_fallback_key_8976
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/mediadb
+    env_file:
+      - .env
     depends_on:
       - db
 

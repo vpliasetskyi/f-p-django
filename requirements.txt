@@ -1,9 +1,0 @@
-Django>=5.0
-psycopg2-binary>=2.9
-gunicorn>=21.2
-django-environ>=0.11
-requests>=2.31
-Pillow>=10.2
-django-htmx>=1.17
-black>=24.2
-flake8>=7.0
