@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Cinemix{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 glass-panel p-10 rounded-2xl shadow-2xl border border-gray-700">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
+                Create a new account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-400">
+                Or <a href="{% url 'login' %}" class="font-medium text-primary hover:text-primary-focus transition-colors">sign in to your existing account</a>
+            </p>
+        </div>
+
+        <form class="mt-8 space-y-6" action="{% url 'signup' %}" method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-error shadow-lg rounded-xl mb-4 text-left">
+                <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="rounded-md shadow-sm space-y-4">
+                {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-1">{{ field.label }}</label>
+                    <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" {% if field.field.required %}required{% endif %} class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm transition-colors">
+                    {% if field.help_text %}
+                    <p class="mt-1 text-xs text-gray-500">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-primary hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-gray-900 transition-all duration-300 shadow-lg shadow-primary/30 mt-6">
+                    Sign Up
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
