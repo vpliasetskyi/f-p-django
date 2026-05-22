@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile - Cinemix{% endblock %}
+
+{% block content %}
+<div class="pt-24 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 min-h-[80vh]">
+    <div class="glass-panel p-10 rounded-3xl border border-gray-700 shadow-2xl relative overflow-hidden">
+        <h1 class="text-3xl font-extrabold text-white mb-8 border-b border-gray-800 pb-4">Edit Profile Settings</h1>
+        
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-error shadow-lg rounded-xl mb-6">
+                <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                {% for field in form %}
+                <div class="form-control">
+                    {% if field.name == 'is_public' %}
+                        <label class="cursor-pointer label justify-start gap-4">
+                            <span class="label-text text-gray-300 font-medium">Public Profile</span> 
+                            <input type="checkbox" name="{{ field.name }}" id="{{ field.id_for_label }}" {% if field.value %}checked{% endif %} class="toggle toggle-primary" />
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1">If enabled, other users can view your catalog and clone your tracked items.</p>
+                    {% elif field.name == 'bio' %}
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Bio</label>
+                        <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" rows="4" class="textarea textarea-bordered w-full bg-gray-800/50 border-gray-600 text-white focus:ring-primary focus:border-primary">{{ field.value|default:'' }}</textarea>
+                    {% else %}
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">{{ field.label }}</label>
+                        <input type="file" name="{{ field.name }}" id="{{ field.id_for_label }}" class="file-input file-input-bordered w-full bg-gray-800/50 border-gray-600 text-white" />
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="flex gap-4 pt-6 border-t border-gray-800 mt-8">
+                <button type="submit" class="btn btn-primary rounded-full px-8 shadow-lg shadow-primary/30">Save Changes</button>
+                <a href="{% url 'profile' request.user.username %}" class="btn btn-ghost rounded-full px-8 text-gray-400">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

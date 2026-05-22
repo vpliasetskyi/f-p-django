@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <h1 class="text-3xl font-bold mb-8">Search Results</h1>
+    {% if results %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        {% for item in results %}
+        <a href="{% url 'content:detail' item.id %}?type={{ item.contnt_type }}" class="relative group rounded-xl overflow-hidden bg-gray-800 border border-gray-700 card-hover block">
+            {% if item.poster_path %}
+                <img src="https://image.tmdb.org/t/p/w500{{ item.poster_path }}" alt="poster" class="w-full h-auto aspect-[2/3] object-cover transition-transform duration-500 group-hover:scale-110">
+            {% else %}
+                <div class="w-full h-full aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center p-4 text-center">
+                    <span class="text-sm text-gray-500 font-medium">{{ item.title|default:item.name }}</span>
+                </div>
+            {% endif %}
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                <span class="badge badge-primary badge-sm mb-2 w-max">{{ item.contnt_type }}</span>
+                <h3 class="text-white font-semibold text-sm leading-tight line-clamp-2">{{ item.title|default:item.name }}</h3>
+                <p class="text-gray-300 text-xs mt-1">{{ item.release_date|default:item.first_air_date|slice:":4" }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-400">No results found.</p>
+    {% endif %}
+</div>
+{% endblock %}
