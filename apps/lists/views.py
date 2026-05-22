@@ -1,6 +1,7 @@
 from django.views.generic import ListView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth import get_user_model
 from .models import WatchItem
 from apps.content.models import ContentItem
 
@@ -24,7 +25,6 @@ class WatchItemToggleView(LoginRequiredMixin, View):
                 defaults={'status': status}
             )
         else:
-            # If status is 'none' or invalid, remove from list
             WatchItem.objects.filter(user=request.user, contnt_item=content_item).delete()
             watch_item = None
 
@@ -33,3 +33,13 @@ class WatchItemToggleView(LoginRequiredMixin, View):
             'watch_item': watch_item,
         }
         return render(request, "lists/partials/track_button.html", context)
+
+class CloneWatchListView(LoginRequiredMixin, View):
+    def post(self, request, username):
+        target_user = get_object_or_404(get_user_model(), username=username)
+        
+        if not target_user.profile.is_public:
+            return redirect('profile', username=username)
+            
+        WatchItem.objects.clone_list_to_user(target_user, request.user)
+        return redirect('lists:my_list')
