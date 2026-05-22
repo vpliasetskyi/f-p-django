@@ -2,6 +2,10 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from .forms import CustomUserCreationForm
+from django.views.generic import DetailView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import CustomUser, Profile
+from .forms import ProfileUpdateForm
 
 class CustomLoginView(LoginView):
     template_name = "registration/login.html"
@@ -14,10 +18,7 @@ class SignUpView(CreateView):
     success_url = reverse_lazy("login")
     template_name = "registration/signup.html"
 
-from django.views.generic import DetailView, UpdateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import CustomUser, Profile
-from .forms import ProfileUpdateForm
+
 
 class ProfileDetailView(DetailView):
     model = CustomUser
