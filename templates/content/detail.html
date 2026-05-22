@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="relative w-full min-h-[70vh] bg-gray-900">
+    <!-- Backdrop Image -->
+    {% if item.poster_path %}
+    <div class="absolute inset-0 z-0">
+        <img src="https://image.tmdb.org/t/p/original{{ item.poster_path }}" class="w-full h-full object-cover opacity-20 filter blur-md" alt="Backdrop">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/80 to-gray-900"></div>
+    </div>
+    {% endif %}
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 flex flex-col md:flex-row gap-10">
+        <!-- Poster -->
+        <div class="flex-shrink-0 w-64 md:w-80 mx-auto md:mx-0">
+            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-primary/20 border border-gray-700 bg-gray-800">
+                {% if item.poster_path %}
+                    <img src="https://image.tmdb.org/t/p/w500{{ item.poster_path }}" alt="{{ item.title }}" class="w-full h-auto object-cover">
+                {% else %}
+                    <div class="w-full aspect-[2/3] flex items-center justify-center">
+                        <span class="text-gray-500">No Image</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div class="flex-1 text-center md:text-left pt-4">
+            <div class="badge badge-primary badge-lg uppercase font-bold tracking-widest mb-4">{{ item.get_contnt_type_display }}</div>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-2">{{ item.title }}</h1>
+            <p class="text-xl text-gray-400 font-light mb-8">{{ item.release_date|date:"Y"|default:"Unknown" }}</p>
+            
+            <h3 class="text-2xl font-semibold text-gray-200 mb-3">Overview</h3>
+            <p class="text-lg text-gray-300 leading-relaxed max-w-3xl">{{ item.overview }}</p>
+
+            <div class="mt-10 flex gap-4 justify-center md:justify-start">
+                <button class="btn btn-primary btn-lg rounded-full px-8 hover:scale-105 transition-transform shadow-lg shadow-primary/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Add to List
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
