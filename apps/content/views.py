@@ -67,3 +67,10 @@ class ContentDetailView(DetailView):
             )
             
         return item
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            from apps.lists.models import WatchItem
+            context['watch_item'] = WatchItem.objects.filter(user=self.request.user, contnt_item=self.object).first()
+        return context
