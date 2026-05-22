@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.username }}'s Profile - Cinemix{% endblock %}
+
+{% block content %}
+<div class="pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 min-h-[80vh]">
+    <!-- Profile Header -->
+    <div class="flex flex-col md:flex-row items-center md:items-start gap-8 bg-gray-800/50 p-8 rounded-3xl border border-gray-700/50 mb-12 shadow-2xl glass-panel relative overflow-hidden">
+        
+        <!-- Decorative blobs -->
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/20 rounded-full mix-blend-screen filter blur-3xl opacity-50"></div>
+        
+        <div class="avatar flex-shrink-0">
+            <div class="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 shadow-2xl shadow-primary/30">
+                {% if profile_user.profile.profile_picture %}
+                    <img src="{{ profile_user.profile.profile_picture.url }}" alt="{{ profile_user.username }}" />
+                {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ profile_user.username }}&background=random&size=128" alt="{{ profile_user.username }}" />
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="flex-1 text-center md:text-left z-10">
+            <h1 class="text-4xl font-extrabold text-white tracking-tight flex items-center justify-center md:justify-start gap-3">
+                {{ profile_user.username }}
+                {% if not profile_user.profile.is_public %}
+                    <span class="badge badge-error badge-sm uppercase font-bold tracking-widest"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg> Private</span>
+                {% else %}
+                    <span class="badge badge-success badge-sm uppercase font-bold tracking-widest"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H9V7a1 1 0 012 0v2h2V7a3 3 0 00-3-3z" /></svg> Public</span>
+                {% endif %}
+            </h1>
+            
+            <p class="text-gray-400 mt-2 text-lg max-w-2xl leading-relaxed">
+                {{ profile_user.profile.bio|default:"This user hasn't added a bio yet. They probably just really like movies." }}
+            </p>
+            
+            <div class="mt-6 flex flex-wrap gap-4 justify-center md:justify-start">
+                {% if request.user == profile_user %}
+                    <a href="{% url 'profile_edit' %}" class="btn btn-outline btn-sm rounded-full border-gray-600 text-gray-300 hover:bg-gray-700">Edit Profile</a>
+                {% elif watch_items and profile_user.profile.is_public %}
+                    <form action="{% url 'lists:clone' profile_user.username %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm rounded-full shadow-lg shadow-primary/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            Clone Catalog
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- User's List -->
+    <div>
+        <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">Tracking History</h2>
+        
+        {% if is_private %}
+            <div class="text-center py-16 bg-gray-800/30 rounded-2xl border border-gray-800 border-dashed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-error mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                <h3 class="text-xl font-medium text-gray-300">This profile is private</h3>
+                <p class="text-gray-500 mt-2">Only the owner can view their tracked media.</p>
+            </div>
+        {% elif watch_items %}
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                {% for watch_item in watch_items %}
+                <div class="relative group rounded-xl overflow-hidden bg-gray-800 border border-gray-700 card-hover block">
+                    <a href="{% url 'content:detail' watch_item.contnt_item.tmdb_id %}?type={{ watch_item.contnt_item.contnt_type }}">
+                        {% if watch_item.contnt_item.poster_path %}
+                            <img src="https://image.tmdb.org/t/p/w500{{ watch_item.contnt_item.poster_path }}" alt="poster" class="w-full h-auto aspect-[2/3] object-cover transition-transform duration-500 group-hover:scale-110">
+                        {% else %}
+                            <div class="w-full h-full aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center p-4 text-center">
+                                <span class="text-sm text-gray-500 font-medium">{{ watch_item.contnt_item.title }}</span>
+                            </div>
+                        {% endif %}
+                    </a>
+                    
+                    <div class="absolute top-2 right-2">
+                        {% if watch_item.status == 'plan_to_watch' %}
+                            <span class="badge badge-info shadow-lg">Plan to Watch</span>
+                        {% elif watch_item.status == 'watching' %}
+                            <span class="badge badge-warning shadow-lg">Watching</span>
+                        {% elif watch_item.status == 'completed' %}
+                            <span class="badge badge-success shadow-lg">Completed</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-16 bg-gray-800/30 rounded-2xl border border-gray-800 border-dashed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                <h3 class="text-xl font-medium text-gray-400">No items tracked</h3>
+                <p class="text-gray-500 mt-2">{{ profile_user.username }} hasn't added any movies to their catalog yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
