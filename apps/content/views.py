@@ -1,11 +1,10 @@
-from django.shortcuts import render
+from django.views.generic import ListView
 from .models import ContentItem
 
-def home_view(request):
-    # Fetch the 12 most recently added content items
-    recent_items = ContentItem.objects.order_by('-created_at')[:12]
+class HomeView(ListView):
+    model = ContentItem
+    template_name = "content/home.html"
+    context_object_name = 'recent_items'
     
-    context = {
-        'recent_items': recent_items,
-    }
-    return render(request, "content/home.html", context)
+    def get_queryset(self):
+        return ContentItem.objects.order_by('-created_at')[:12]
