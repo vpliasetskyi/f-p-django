@@ -132,3 +132,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Authentication Redirects
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# TMDB API
+TMDB_API_KEY = env('TMDB_API_KEY', default='')
