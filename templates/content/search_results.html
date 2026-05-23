@@ -10,14 +10,14 @@
                 <img src="https://image.tmdb.org/t/p/w500{{ item.poster_path }}" alt="poster" class="w-full h-auto aspect-[2/3] object-cover transition-transform duration-500 group-hover:scale-110">
             {% else %}
                 <div class="w-full h-full aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center p-4 text-center">
-                    <span class="text-sm text-gray-500 font-medium">{{ item.title|default:item.name }}</span>
+                    <span class="text-sm text-gray-500 font-medium">{% firstof item.title item.name %}</span>
                 </div>
             {% endif %}
             
             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                 <span class="badge badge-primary badge-sm mb-2 w-max">{{ item.contnt_type }}</span>
-                <h3 class="text-white font-semibold text-sm leading-tight line-clamp-2">{{ item.title|default:item.name }}</h3>
-                <p class="text-gray-300 text-xs mt-1">{{ item.release_date|default:item.first_air_date|slice:":4" }}</p>
+                <h3 class="text-white font-semibold text-sm leading-tight line-clamp-2">{% firstof item.title item.name %}</h3>
+                <p class="text-gray-300 text-xs mt-1">{% firstof item.release_date item.first_air_date as release_date %}{{ release_date|slice:":4" }}</p>
             </div>
         </a>
         {% endfor %}
