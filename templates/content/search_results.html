@@ -5,21 +5,39 @@
     {% if results %}
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
         {% for item in results %}
-        <a href="{% url 'content:detail' item.id %}?type={{ item.contnt_type }}" class="relative group rounded-xl overflow-hidden bg-gray-800 border border-gray-700 card-hover block">
-            {% if item.poster_path %}
-                <img src="https://image.tmdb.org/t/p/w500{{ item.poster_path }}" alt="poster" class="w-full h-auto aspect-[2/3] object-cover transition-transform duration-500 group-hover:scale-110">
-            {% else %}
-                <div class="w-full h-full aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center p-4 text-center">
-                    <span class="text-sm text-gray-500 font-medium">{% firstof item.title item.name %}</span>
+        <div class="relative group rounded-xl overflow-hidden bg-gray-800 border border-gray-700 card-hover" x-data="{ addOpen: false }">
+            <a href="{% url 'content:detail' item.id %}?type={{ item.contnt_type }}" class="block">
+                {% if item.poster_path %}
+                    <img src="https://image.tmdb.org/t/p/w500{{ item.poster_path }}" alt="poster" class="w-full h-auto aspect-[2/3] object-cover transition-transform duration-500 group-hover:scale-110">
+                {% else %}
+                    <div class="w-full h-full aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center p-4 text-center">
+                        <span class="text-sm text-gray-500 font-medium">{% firstof item.title item.name %}</span>
+                    </div>
+                {% endif %}
+
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <span class="badge badge-primary badge-sm mb-2 w-max">{{ item.contnt_type }}</span>
+                    <h3 class="text-white font-semibold text-sm leading-tight line-clamp-2">{% firstof item.title item.name %}</h3>
+                    <p class="text-gray-300 text-xs mt-1">{% firstof item.release_date item.first_air_date as release_date %}{{ release_date|slice:":4" }}</p>
+                    {% if item.vote_average %}
+                    <span class="text-yellow-400 text-xs font-semibold mt-1">&#9733; {{ item.vote_average|floatformat:1 }}</span>
+                    {% endif %}
                 </div>
-            {% endif %}
-            
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                <span class="badge badge-primary badge-sm mb-2 w-max">{{ item.contnt_type }}</span>
-                <h3 class="text-white font-semibold text-sm leading-tight line-clamp-2">{% firstof item.title item.name %}</h3>
-                <p class="text-gray-300 text-xs mt-1">{% firstof item.release_date item.first_air_date as release_date %}{{ release_date|slice:":4" }}</p>
+            </a>
+
+            {% if request.user.is_authenticated %}
+            <button @click.stop="addOpen = !addOpen"
+                class="absolute top-2 right-2 z-10 btn btn-xs btn-circle btn-ghost bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Add to list">+</button>
+            <div x-show="addOpen" @click.outside="addOpen = false"
+                class="absolute inset-x-0 bottom-0 z-20 bg-gray-900/95 p-3 text-xs"
+                hx-get="{% url 'lists:add_to_list' item.id %}"
+                hx-trigger="intersect once"
+                hx-target="this">
+                Loading lists&hellip;
             </div>
-        </a>
+            {% endif %}
+        </div>
         {% endfor %}
     </div>
     {% else %}

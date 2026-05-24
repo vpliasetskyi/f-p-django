@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Edit{% else %}Create{% endif %} List – Cinemix{% endblock %}
+
+{% block content %}
+<div class="pt-24 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="glass-panel rounded-2xl p-8">
+        <h1 class="text-2xl font-bold mb-6">{% if object %}Edit "{{ object.name }}"{% else %}Create New List{% endif %}</h1>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            <div>
+                <label class="label"><span class="label-text text-gray-300">List Name</span></label>
+                <input type="text" name="name" value="{{ form.name.value|default:'' }}"
+                    class="input input-bordered w-full bg-gray-800 border-gray-700 focus:border-primary"
+                    placeholder="e.g. Weekend Watchlist" required maxlength="255">
+                {% if form.name.errors %}<p class="text-error text-xs mt-1">{{ form.name.errors|join:", " }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="label"><span class="label-text text-gray-300">Description <span class="text-gray-500">(optional)</span></span></label>
+                <textarea name="description" rows="3"
+                    class="textarea textarea-bordered w-full bg-gray-800 border-gray-700 focus:border-primary"
+                    placeholder="What's this list about?">{{ form.description.value|default:'' }}</textarea>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn btn-primary flex-1">
+                    {% if object %}Save Changes{% else %}Create List{% endif %}
+                </button>
+                <a href="{% url 'lists:my_list' %}" class="btn btn-ghost">Cancel</a>
+            </div>
+        </form>
+
+        {% if not object %}
+        <!-- Embedded Advanced Search to find and preview content -->
+        <div class="divider my-8 text-gray-600">Or find content first</div>
+        <div hx-get="{% url 'content:discover' %}"
+             hx-trigger="load"
+             hx-target="this"
+             class="min-h-24 flex items-center justify-center text-gray-500 text-sm">
+            Loading advanced search&hellip;
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
