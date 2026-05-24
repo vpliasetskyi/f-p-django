@@ -37,6 +37,59 @@ def search_multi(query):
         logger.error(f"Error fetching from TMDB: {e}")
         return []
 
+def get_genres():
+    if not TMDB_API_KEY:
+        logger.warning("TMDB API Key is not set.")
+        return {'movie': [], 'tv': []}
+
+    genres = {}
+    for media_type in ('movie', 'tv'):
+        url = f"{TMDB_BASE_URL}/genre/{media_type}/list"
+        try:
+            response = httpx.get(url, params={'api_key': TMDB_API_KEY, 'language': 'en-US'}, timeout=5.0)
+            response.raise_for_status()
+            genres[media_type] = response.json().get('genres', [])
+        except Exception as e:
+            logger.error(f"Error fetching {media_type} genres: {e}")
+            genres[media_type] = []
+    return genres
+
+
+def discover_media(media_type='movie', year=None, country=None, genre_id=None, min_rating=None, page=1):
+    if not TMDB_API_KEY:
+        logger.warning("TMDB API Key is not set.")
+        return []
+
+    url = f"{TMDB_BASE_URL}/discover/{media_type}"
+    params = {
+        'api_key': TMDB_API_KEY,
+        'language': 'en-US',
+        'sort_by': 'popularity.desc',
+        'page': page,
+        'include_adult': 'false',
+    }
+    if year:
+        key = 'primary_release_year' if media_type == 'movie' else 'first_air_date_year'
+        params[key] = year
+    if country:
+        params['with_origin_country'] = country
+    if genre_id:
+        params['with_genres'] = genre_id
+    if min_rating:
+        params['vote_average.gte'] = min_rating
+
+    try:
+        response = httpx.get(url, params=params, timeout=5.0)
+        response.raise_for_status()
+        results = response.json().get('results', [])
+        for item in results:
+            item['contnt_type'] = media_type
+        return results
+    except Exception as e:
+        logger.error(f"Error fetching discover results: {e}")
+        return []
+
+
 def get_details(tmdb_id, content_type='movie'):
     if not TMDB_API_KEY:
         logger.warning("TMDB API Key is not set.")
