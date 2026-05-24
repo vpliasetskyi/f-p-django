@@ -14,6 +14,7 @@ class ContentItem(models.Model):
     overview = models.TextField(blank=True)
     poster_path = models.CharField(max_length=255, null=True, blank=True, help_text="CDN path for TMDB poster or custom path")
     custom_poster = models.ImageField(upload_to='custom_posters/', null=True, blank=True, help_text="Uploaded custom poster if not using TMDB")
+    vote_average = models.FloatField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
