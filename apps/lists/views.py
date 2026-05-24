@@ -76,8 +76,11 @@ class CustomListDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class AddToListView(LoginRequiredMixin, View):
+    def _get_content_item(self, tmdb_id):
+        return get_object_or_404(ContentItem, tmdb_id=tmdb_id)
+
     def post(self, request, content_id):
-        content_item = get_object_or_404(ContentItem, id=content_id)
+        content_item = self._get_content_item(content_id)
         list_id = request.POST.get('list_id')
         list_name = request.POST.get('list_name', '').strip()
 
@@ -97,7 +100,7 @@ class AddToListView(LoginRequiredMixin, View):
         })
 
     def get(self, request, content_id):
-        content_item = get_object_or_404(ContentItem, id=content_id)
+        content_item = self._get_content_item(content_id)
         user_lists = CustomList.objects.filter(user=request.user).order_by('name')
         return render(request, 'lists/partials/add_to_list_panel.html', {
             'content_item': content_item,

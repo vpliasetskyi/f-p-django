@@ -77,7 +77,7 @@
                     title="Add to list">+</button>
                 <div x-show="addOpen" @click.outside="addOpen = false"
                     class="absolute inset-x-0 bottom-0 z-20 bg-gray-900/95 p-3 text-xs"
-                    hx-get="{% url 'lists:add_to_list' item.pk %}"
+                    hx-get="{% url 'lists:add_to_list' item.tmdb_id %}"
                     hx-trigger="intersect once"
                     hx-target="this">
                     Loading lists&hellip;
