@@ -1,0 +1,32 @@
+{% for item in results %}
+<div class="cx-cl-result-item">
+  <div class="cx-cl-result-poster">
+    {% firstof item.title item.name as display_title %}
+    {% if item.poster_path %}
+      <img src="https://image.tmdb.org/t/p/w92{{ item.poster_path }}" alt="{{ display_title }}">
+    {% endif %}
+  </div>
+  <div style="flex:1;min-width:0">
+    <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ display_title }}</div>
+    <div style="font-family:var(--f-mono);font-size:11px;color:var(--text-3);margin-top:3px;display:flex;gap:8px">
+      <span>{% firstof item.release_date item.first_air_date as rd %}{{ rd|slice:":4" }}</span>
+      <span style="padding:1px 6px;border:1px solid var(--border-strong);border-radius:999px;text-transform:uppercase;font-size:9px;letter-spacing:0.08em">{{ item.contnt_type }}</span>
+      {% if item.vote_average %}<span style="color:var(--accent-warm)">★ {{ item.vote_average|floatformat:1 }}</span>{% endif %}
+    </div>
+  </div>
+  {% if item.id|stringformat:"s" in existing_tmdb_ids|join:"," %}
+  <span style="font-size:12px;color:var(--text-3);padding:6px 12px;border:1px solid var(--border);border-radius:999px">Already added</span>
+  {% else %}
+  <button class="cx-btn cx-btn-primary cx-btn-sm"
+          hx-post="{% url 'lists:custom_list_add_item' custom_list.pk %}"
+          hx-vals='{"tmdb_id": "{{ item.id }}", "content_type": "{{ item.contnt_type }}"}'
+          hx-target="#cl-added-items"
+          hx-swap="innerHTML">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Add
+  </button>
+  {% endif %}
+</div>
+{% empty %}
+<p style="color:var(--text-3);font-size:13px;padding:14px 0">No results. Try a different search.</p>
+{% endfor %}

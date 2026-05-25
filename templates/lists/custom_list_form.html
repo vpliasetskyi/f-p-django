@@ -1,45 +1,80 @@
 {% extends 'base.html' %}
-{% block title %}{% if object %}Edit{% else %}Create{% endif %} List – Cinemix{% endblock %}
+{% block title %}{{ custom_list.name }} — Cinemix{% endblock %}
 
 {% block content %}
-<div class="pt-24 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-    <div class="glass-panel rounded-2xl p-8">
-        <h1 class="text-2xl font-bold mb-6">{% if object %}Edit "{{ object.name }}"{% else %}Create New List{% endif %}</h1>
+<div class="cx-cl-form" x-data="{ popupOpen: false }"
+     @open-item-popup.window="popupOpen = true"
+     @close-item-popup.window="popupOpen = false">
 
-        <form method="post" class="space-y-5">
-            {% csrf_token %}
-            <div>
-                <label class="label"><span class="label-text text-gray-300">List Name</span></label>
-                <input type="text" name="name" value="{{ form.name.value|default:'' }}"
-                    class="input input-bordered w-full bg-gray-800 border-gray-700 focus:border-primary"
-                    placeholder="e.g. Weekend Watchlist" required maxlength="255">
-                {% if form.name.errors %}<p class="text-error text-xs mt-1">{{ form.name.errors|join:", " }}</p>{% endif %}
-            </div>
-            <div>
-                <label class="label"><span class="label-text text-gray-300">Description <span class="text-gray-500">(optional)</span></span></label>
-                <textarea name="description" rows="3"
-                    class="textarea textarea-bordered w-full bg-gray-800 border-gray-700 focus:border-primary"
-                    placeholder="What's this list about?">{{ form.description.value|default:'' }}</textarea>
-            </div>
-
-            <div class="flex gap-3 pt-2">
-                <button type="submit" class="btn btn-primary flex-1">
-                    {% if object %}Save Changes{% else %}Create List{% endif %}
-                </button>
-                <a href="{% url 'lists:my_list' %}" class="btn btn-ghost">Cancel</a>
-            </div>
-        </form>
-
-        {% if not object %}
-        <!-- Embedded Advanced Search to find and preview content -->
-        <div class="divider my-8 text-gray-600">Or find content first</div>
-        <div hx-get="{% url 'content:discover' %}"
-             hx-trigger="load"
-             hx-target="this"
-             class="min-h-24 flex items-center justify-center text-gray-500 text-sm">
-            Loading advanced search&hellip;
-        </div>
-        {% endif %}
+  {# ── List name ─────────────────────────────────────────── #}
+  <form method="post" id="list-name-form" style="margin-bottom:32px">
+    {% csrf_token %}
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <input class="cx-cl-name-input" name="name" value="{{ custom_list.name }}"
+             placeholder="Name your list…" required maxlength="255" style="flex:1;min-width:200px">
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="cx-btn cx-btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          Save List
+        </button>
+        <a href="{% url 'lists:my_list' %}" class="cx-btn cx-btn-secondary">Cancel</a>
+      </div>
     </div>
+  </form>
+
+  {# ── Search + filters ──────────────────────────────────── #}
+  <div class="cx-cl-filter-bar">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input class="cx-cl-filter-input" style="flex:2;min-width:160px"
+           name="q" placeholder="Search by title…"
+           hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+           hx-trigger="keyup changed delay:400ms"
+           hx-target="#cl-search-results"
+           hx-include="[name='year'],[name='country'],[name='min_rating'],[name='actor']"
+           autocomplete="off">
+    <input class="cx-cl-filter-input" name="year" placeholder="Year" type="number" style="width:90px"
+           hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+           hx-trigger="keyup changed delay:600ms"
+           hx-target="#cl-search-results"
+           hx-include="[name='q'],[name='country'],[name='min_rating'],[name='actor']">
+    <input class="cx-cl-filter-input" name="country" placeholder="Country" maxlength="4" style="width:100px"
+           hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+           hx-trigger="keyup changed delay:600ms"
+           hx-target="#cl-search-results"
+           hx-include="[name='q'],[name='year'],[name='min_rating'],[name='actor']">
+    <select class="cx-cl-filter-input" name="min_rating" style="width:110px"
+            hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+            hx-trigger="change"
+            hx-target="#cl-search-results"
+            hx-include="[name='q'],[name='year'],[name='country'],[name='actor']">
+      <option value="">Any Rating</option>
+      <option value="5">5+</option>
+      <option value="6">6+</option>
+      <option value="7">7+</option>
+      <option value="8">8+</option>
+    </select>
+    <input class="cx-cl-filter-input" name="actor" placeholder="Actor name" style="width:150px"
+           hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+           hx-trigger="keyup changed delay:600ms"
+           hx-target="#cl-search-results"
+           hx-include="[name='q'],[name='year'],[name='country'],[name='min_rating']">
+  </div>
+
+  {# ── Search results (HTMX target) ──────────────────────── #}
+  <div id="cl-search-results" class="cx-cl-search-results"></div>
+
+  {# ── Added items ───────────────────────────────────────── #}
+  <div class="cx-cl-added-section">
+    <div id="cl-added-items">
+      {% include 'lists/partials/cl_added_items.html' %}
+    </div>
+  </div>
+
+  {# ── Item edit popup ───────────────────────────────────── #}
+  <div class="cx-cl-popup-overlay" x-show="popupOpen" x-cloak @click.self="popupOpen = false">
+    <div class="cx-cl-popup" id="cl-popup-content">
+      <!-- loaded via HTMX -->
+    </div>
+  </div>
 </div>
 {% endblock %}

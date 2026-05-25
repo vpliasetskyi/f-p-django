@@ -1,55 +1,166 @@
 {% extends 'base.html' %}
-{% block title %}My List - Cinemix{% endblock %}
+{% block title %}My Lists — Cinemix{% endblock %}
 
 {% block content %}
-<div class="pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 min-h-[80vh]">
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <h1 class="text-4xl font-extrabold tracking-tight text-white">My Watchlist</h1>
-            <p class="text-gray-400 mt-2 font-light">Everything you're tracking.</p>
-        </div>
+<div class="cx-page-head">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px">
+    <div>
+      <h1 class="cx-page-title">My Lists</h1>
+      <p class="cx-page-sub">Everything you're tracking.</p>
     </div>
+    <a href="{% url 'lists:custom_list_create' %}" class="cx-btn cx-btn-primary cx-btn-sm">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      New List
+    </a>
+  </div>
+</div>
 
-    {% if watch_items %}
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-        {% for watch_item in watch_items %}
-        <div class="relative group rounded-xl overflow-hidden bg-gray-800 border border-gray-700 card-hover block">
-            <a href="{% url 'content:detail' watch_item.contnt_item.tmdb_id %}?type={{ watch_item.contnt_item.contnt_type }}">
-                {% if watch_item.contnt_item.poster_path %}
-                    <img src="https://image.tmdb.org/t/p/w500{{ watch_item.contnt_item.poster_path }}" alt="poster" class="w-full h-auto aspect-[2/3] object-cover transition-transform duration-500 group-hover:scale-110">
-                {% else %}
-                    <div class="w-full h-full aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center p-4 text-center">
-                        <span class="text-sm text-gray-500 font-medium">{{ watch_item.contnt_item.title }}</span>
-                    </div>
-                {% endif %}
-            </a>
-            
-            <!-- Status Badge overlay -->
-            <div class="absolute top-2 right-2">
-                {% if watch_item.status == 'plan_to_watch' %}
-                    <span class="badge badge-info shadow-lg">Plan to Watch</span>
-                {% elif watch_item.status == 'watching' %}
-                    <span class="badge badge-warning shadow-lg">Watching</span>
-                {% elif watch_item.status == 'completed' %}
-                    <span class="badge badge-success shadow-lg">Completed</span>
-                {% endif %}
-            </div>
+{# ── Status lists ────────────────────────────────────────── #}
+<div class="cx-lists-grid" style="margin-bottom:40px">
+  {# Plan to Watch — cyan #}
+  <div class="cx-list-card" style="--accent-color:var(--accent-cyan)">
+    <div class="cx-list-card-head">
+      <div>
+        <div class="cx-list-card-name">Plan to Watch</div>
+        <div class="cx-list-card-count">{{ plan_to_watch_items|length }} titles</div>
+      </div>
+      <div class="cx-list-card-badge" style="color:var(--accent-cyan)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </div>
+    </div>
+    <div class="cx-list-card-posters">
+      {% for wi in plan_to_watch_items|slice:":4" %}
+      <div class="stack-poster">
+        {% if wi.contnt_item.poster_path %}<img src="https://image.tmdb.org/t/p/w185{{ wi.contnt_item.poster_path }}" alt="" style="width:100%;height:100%;object-fit:cover">{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="cx-list-card-foot">
+      <span class="cx-list-card-recent">{{ plan_to_watch_items|length }} items</span>
+      <span class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+    </div>
+  </div>
 
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
-                <h3 class="text-white font-semibold text-sm leading-tight line-clamp-2">{{ watch_item.contnt_item.title }}</h3>
-            </div>
-        </div>
-        {% endfor %}
+  {# Watching — amber #}
+  <div class="cx-list-card" style="--accent-color:var(--accent-warm)">
+    <div class="cx-list-card-head">
+      <div>
+        <div class="cx-list-card-name">Watching</div>
+        <div class="cx-list-card-count">{{ watching_items|length }} titles</div>
+      </div>
+      <div class="cx-list-card-badge" style="color:var(--accent-warm)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
     </div>
-    {% else %}
-    <div class="text-center py-20 bg-gray-800/30 rounded-2xl border border-gray-800 border-dashed">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-        </svg>
-        <h3 class="text-xl font-medium text-gray-400">Your list is empty</h3>
-        <p class="text-gray-500 mt-2">Start exploring to build your catalog.</p>
-        <a href="/" class="btn btn-primary mt-6">Explore Movies</a>
+    <div class="cx-list-card-posters">
+      {% for wi in watching_items|slice:":4" %}
+      <div class="stack-poster">
+        {% if wi.contnt_item.poster_path %}<img src="https://image.tmdb.org/t/p/w185{{ wi.contnt_item.poster_path }}" alt="" style="width:100%;height:100%;object-fit:cover">{% endif %}
+      </div>
+      {% endfor %}
     </div>
-    {% endif %}
+    <div class="cx-list-card-foot">
+      <span class="cx-list-card-recent">{{ watching_items|length }} items</span>
+      <span class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+    </div>
+  </div>
+
+  {# Completed — mint #}
+  <div class="cx-list-card" style="--accent-color:var(--accent-mint)">
+    <div class="cx-list-card-head">
+      <div>
+        <div class="cx-list-card-name">Completed</div>
+        <div class="cx-list-card-count">{{ completed_items|length }} titles</div>
+      </div>
+      <div class="cx-list-card-badge" style="color:var(--accent-mint)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+    </div>
+    <div class="cx-list-card-posters">
+      {% for wi in completed_items|slice:":4" %}
+      <div class="stack-poster">
+        {% if wi.contnt_item.poster_path %}<img src="https://image.tmdb.org/t/p/w185{{ wi.contnt_item.poster_path }}" alt="" style="width:100%;height:100%;object-fit:cover">{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="cx-list-card-foot">
+      <span class="cx-list-card-recent">{{ completed_items|length }} items</span>
+      <span class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+    </div>
+  </div>
+
+  {# Rated — pink #}
+  <div class="cx-list-card" style="--accent-color:var(--accent-pink)">
+    <div class="cx-list-card-head">
+      <div>
+        <div class="cx-list-card-name">Rated</div>
+        <div class="cx-list-card-count">{{ rated_items|length }} titles</div>
+      </div>
+      <div class="cx-list-card-badge" style="color:var(--accent-pink)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+    </div>
+    <div class="cx-list-card-posters">
+      {% for wi in rated_items|slice:":4" %}
+      <div class="stack-poster">
+        {% if wi.contnt_item.poster_path %}<img src="https://image.tmdb.org/t/p/w185{{ wi.contnt_item.poster_path }}" alt="" style="width:100%;height:100%;object-fit:cover">{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="cx-list-card-foot">
+      <span class="cx-list-card-recent">{{ rated_items|length }} items</span>
+      <span class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+    </div>
+  </div>
+</div>
+
+{# ── Custom lists ────────────────────────────────────────── #}
+<div style="max-width:1440px;margin:0 auto;padding:0 28px">
+  <h2 class="cx-section-title" style="margin-bottom:20px">Custom Lists</h2>
+</div>
+<div class="cx-lists-grid custom">
+  {% for cl in custom_lists %}
+  <div class="cx-list-card">
+    <div class="cx-list-card-head">
+      <div>
+        <div class="cx-list-card-name">{{ cl.name }}</div>
+        <div class="cx-list-card-count">{{ cl.list_items.count }} items</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <a href="{% url 'lists:custom_list_update' cl.pk %}" class="cx-btn-icon" title="Edit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </a>
+        <form id="del-{{ cl.pk }}" method="post" action="{% url 'lists:custom_list_delete' cl.pk %}" style="margin:0">{% csrf_token %}</form>
+        <button class="cx-btn-icon" style="color:#f87171" title="Delete"
+                onclick="if(confirm('Delete &quot;{{ cl.name }}&quot;?')) document.getElementById('del-{{ cl.pk }}').submit()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="cx-list-card-posters">
+      {% for li in cl.list_items.all|slice:":4" %}
+      <div class="stack-poster">
+        {% if li.custom_poster %}
+          <img src="{{ li.custom_poster.url }}" alt="" style="width:100%;height:100%;object-fit:cover">
+        {% elif li.content_item.poster_path %}
+          <img src="https://image.tmdb.org/t/p/w185{{ li.content_item.poster_path }}" alt="" style="width:100%;height:100%;object-fit:cover">
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="cx-list-card-foot">
+      <span class="cx-list-card-recent">Updated {{ cl.updated_at|date:"M d" }}</span>
+      <a href="{% url 'lists:custom_list_update' cl.pk %}" class="cx-list-card-view">
+        Edit list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+
+  {# Dashed add card #}
+  <a href="{% url 'lists:custom_list_create' %}" class="cx-list-card custom-add">
+    <div class="plus">+</div>
+    <span style="font-size:15px;font-weight:500">Create a new list</span>
+  </a>
 </div>
 {% endblock %}

@@ -1,51 +1,59 @@
 {% extends 'base.html' %}
-{% block title %}Edit Profile - Cinemix{% endblock %}
+{% block title %}Edit Profile — Cinemix{% endblock %}
 
 {% block content %}
-<div class="pt-24 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 min-h-[80vh]">
-    <div class="glass-panel p-10 rounded-3xl border border-gray-700 shadow-2xl relative overflow-hidden">
-        <h1 class="text-3xl font-extrabold text-white mb-8 border-b border-gray-800 pb-4">Edit Profile Settings</h1>
-        
-        <form method="post" enctype="multipart/form-data" class="space-y-6">
-            {% csrf_token %}
-            
-            {% if form.errors %}
-            <div class="alert alert-error shadow-lg rounded-xl mb-6">
-                <ul>
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
+<div class="cx-auth-wrap" style="align-items:flex-start;padding-top:60px">
+  <div class="cx-auth-card" style="max-width:520px">
+    <h1 class="cx-auth-title">Edit Profile</h1>
+    <p class="cx-auth-sub" style="margin-bottom:24px">Update your bio, photo and privacy settings.</p>
 
-            <div class="space-y-4">
-                {% for field in form %}
-                <div class="form-control">
-                    {% if field.name == 'is_public' %}
-                        <label class="cursor-pointer label justify-start gap-4">
-                            <span class="label-text text-gray-300 font-medium">Public Profile</span> 
-                            <input type="checkbox" name="{{ field.name }}" id="{{ field.id_for_label }}" {% if field.value %}checked{% endif %} class="toggle toggle-primary" />
-                        </label>
-                        <p class="text-xs text-gray-500 mt-1">If enabled, other users can view your catalog and clone your tracked items.</p>
-                    {% elif field.name == 'bio' %}
-                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">Bio</label>
-                        <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" rows="4" class="textarea textarea-bordered w-full bg-gray-800/50 border-gray-600 text-white focus:ring-primary focus:border-primary">{{ field.value|default:'' }}</textarea>
-                    {% else %}
-                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">{{ field.label }}</label>
-                        <input type="file" name="{{ field.name }}" id="{{ field.id_for_label }}" class="file-input file-input-bordered w-full bg-gray-800/50 border-gray-600 text-white" />
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="flex gap-4 pt-6 border-t border-gray-800 mt-8">
-                <button type="submit" class="btn btn-primary rounded-full px-8 shadow-lg shadow-primary/30">Save Changes</button>
-                <a href="{% url 'profile' request.user.username %}" class="btn btn-ghost rounded-full px-8 text-gray-400">Cancel</a>
-            </div>
-        </form>
+    {% if form.errors %}
+    <div class="cx-auth-error">
+      {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
     </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="cx-field">
+        <label class="cx-field-label" for="{{ form.bio.id_for_label }}">Bio</label>
+        <textarea class="cx-input"
+                  name="{{ form.bio.name }}"
+                  id="{{ form.bio.id_for_label }}"
+                  rows="4"
+                  placeholder="Tell the world about your taste in cinema…">{{ form.bio.value|default:'' }}</textarea>
+      </div>
+
+      <div class="cx-field">
+        <label class="cx-field-label" for="{{ form.profile_picture.id_for_label }}">Profile Photo</label>
+        <input class="cx-input"
+               type="file"
+               name="{{ form.profile_picture.name }}"
+               id="{{ form.profile_picture.id_for_label }}"
+               accept="image/*"
+               style="padding:10px 12px">
+      </div>
+
+      <div class="cx-field" style="margin-top:18px">
+        <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+          <input type="checkbox"
+                 name="{{ form.is_public.name }}"
+                 id="{{ form.is_public.id_for_label }}"
+                 {% if form.is_public.value %}checked{% endif %}
+                 style="width:18px;height:18px;accent-color:var(--primary)">
+          <span>
+            <span class="cx-field-label" style="display:block;margin:0 0 2px">Public Profile</span>
+            <span style="font-size:12px;color:var(--text-3)">Let others see your tracking history and import your list.</span>
+          </span>
+        </label>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:28px">
+        <button type="submit" class="cx-auth-submit" style="flex:1">Save Changes</button>
+        <a href="{% url 'profile' request.user.username %}" class="cx-btn cx-btn-ghost" style="border:1px solid var(--border)">Cancel</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
