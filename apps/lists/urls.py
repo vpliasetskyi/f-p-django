@@ -10,5 +10,9 @@ urlpatterns = [
     path("custom/create/", views.CustomListCreateView.as_view(), name="custom_list_create"),
     path("custom/<int:pk>/edit/", views.CustomListUpdateView.as_view(), name="custom_list_update"),
     path("custom/<int:pk>/delete/", views.CustomListDeleteView.as_view(), name="custom_list_delete"),
+    path("custom/<int:pk>/search/", views.CustomListTMDBSearchView.as_view(), name="custom_list_search"),
+    path("custom/<int:pk>/add-item/", views.CustomListAddItemView.as_view(), name="custom_list_add_item"),
+    path("custom/<int:pk>/remove-item/<int:item_pk>/", views.CustomListRemoveItemView.as_view(), name="custom_list_remove_item"),
+    path("custom/<int:pk>/edit-item/<int:item_pk>/", views.CustomListItemEditView.as_view(), name="custom_list_item_edit"),
     path("add-to-list/<int:content_id>/", views.AddToListView.as_view(), name="add_to_list"),
 ]
