@@ -107,6 +107,8 @@ def discover_media(media_type='movie', year=None, country=None, genre_id=None, m
         params['with_genres'] = genre_id
     if min_rating:
         params['vote_average.gte'] = min_rating
+    if with_people:
+        params['with_people'] = with_people
 
     try:
         response = httpx.get(url, params=params, timeout=5.0)
