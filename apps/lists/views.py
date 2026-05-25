@@ -76,7 +76,7 @@ class CloneWatchListView(LoginRequiredMixin, View):
         source_user = get_object_or_404(get_user_model(), username=username)
 
         if not source_user.profile.is_public:
-            return redirect('users:profile', username=username)
+            return redirect('profile', username=username)
 
         custom_list = CustomList.objects.create(
             user=request.user,
