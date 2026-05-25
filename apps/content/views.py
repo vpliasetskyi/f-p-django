@@ -9,9 +9,15 @@ class HomeView(ListView):
     model = ContentItem
     template_name = "content/home.html"
     context_object_name = 'recent_items'
-    
+
     def get_queryset(self):
         return ContentItem.objects.order_by('-created_at')[:12]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['highest_rated'] = ContentItem.objects.order_by('-vote_average')[:12]
+        return context
+
 
 class ContentSearchView(ListView):
     template_name = "content/search_results.html"
@@ -22,11 +28,12 @@ class ContentSearchView(ListView):
         if not query:
             return []
         return tmdb.search_multi(query)
-        
+
     def get_template_names(self):
         if self.request.headers.get('HX-Request'):
             return ["components/search_dropdown.html"]
         return [self.template_name]
+
 
 class ContentDetailView(DetailView):
     model = ContentItem
@@ -36,17 +43,14 @@ class ContentDetailView(DetailView):
     def get_object(self, queryset=None):
         tmdb_id = self.kwargs.get('pk')
         content_type = self.request.GET.get('type', 'movie')
-        
-        # Try to get from local DB
+
         item = ContentItem.objects.filter(tmdb_id=tmdb_id).first()
-        
+
         if not item:
-            # Not in DB, fetch from TMDB and cache it locally
             data = tmdb.get_details(tmdb_id, content_type)
             if not data:
                 raise Http404("Content not found on TMDB")
-                
-            # Parse release date securely
+
             release_date_str = data.get('release_date') or data.get('first_air_date')
             release_date = None
             if release_date_str:
@@ -54,8 +58,7 @@ class ContentDetailView(DetailView):
                     release_date = datetime.strptime(release_date_str, "%Y-%m-%d").date()
                 except ValueError:
                     pass
-            
-            # Create local ContentItem
+
             item = ContentItem.objects.create(
                 tmdb_id=data.get('id'),
                 imdb_id=data.get('imdb_id'),
@@ -66,20 +69,53 @@ class ContentDetailView(DetailView):
                 poster_path=data.get('poster_path', ''),
                 vote_average=data.get('vote_average'),
             )
+            self._tmdb_details = data
         else:
-            # Refresh vote_average from TMDB if stale
-            vote_average = data.get('vote_average') if (data := tmdb.get_details(item.tmdb_id, item.contnt_type)) else None
-            if vote_average is not None and vote_average != item.vote_average:
-                item.vote_average = vote_average
-                item.save(update_fields=['vote_average'])
-            
+            data = tmdb.get_details(item.tmdb_id, item.contnt_type)
+            self._tmdb_details = data
+            if data:
+                vote_average = data.get('vote_average')
+                if vote_average is not None and vote_average != item.vote_average:
+                    item.vote_average = vote_average
+                    item.save(update_fields=['vote_average'])
+
         return item
-        
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        item = self.object
+        details = getattr(self, '_tmdb_details', None)
+        credits = tmdb.get_credits(item.tmdb_id, item.contnt_type)
+
+        if details:
+            context['genres'] = details.get('genres', [])
+            context['backdrop_path'] = details.get('backdrop_path', '')
+            context['tagline'] = details.get('tagline', '')
+            context['vote_count'] = details.get('vote_count', 0)
+            runtime = details.get('runtime') or (details.get('episode_run_time') or [None])[0]
+            context['runtime'] = runtime
+        else:
+            context['genres'] = []
+            context['backdrop_path'] = ''
+            context['tagline'] = ''
+            context['vote_count'] = 0
+            context['runtime'] = None
+
+        if credits:
+            crew = credits.get('crew', [])
+            directors = [c for c in crew if c.get('job') == 'Director']
+            context['director'] = directors[0]['name'] if directors else ''
+            context['cast'] = credits.get('cast', [])[:5]
+        else:
+            context['director'] = ''
+            context['cast'] = []
+
         if self.request.user.is_authenticated:
             from apps.lists.models import WatchItem
-            context['watch_item'] = WatchItem.objects.filter(user=self.request.user, contnt_item=self.object).first()
+            context['watch_item'] = WatchItem.objects.filter(
+                user=self.request.user, contnt_item=item
+            ).first()
+
         return context
 
 

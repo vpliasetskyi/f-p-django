@@ -7,12 +7,28 @@ class CustomList(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='custom_lists')
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    items = models.ManyToManyField('content.ContentItem', related_name='in_lists', blank=True)
+    items = models.ManyToManyField('content.ContentItem', through='CustomListItem', related_name='in_lists', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.name}"
+
+
+class CustomListItem(models.Model):
+    custom_list = models.ForeignKey(CustomList, on_delete=models.CASCADE, related_name='list_items')
+    content_item = models.ForeignKey('content.ContentItem', on_delete=models.CASCADE, related_name='custom_list_entries')
+    custom_poster = models.ImageField(upload_to='custom_posters/', null=True, blank=True)
+    custom_title = models.CharField(max_length=255, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('custom_list', 'content_item')
+        ordering = ['order', 'added_at']
+
+    def __str__(self):
+        return f"{self.custom_list.name} — {self.content_item.title}"
 
 class WatchItemQuerySet(models.QuerySet):
     def clone_list_to_user(self, source_user, target_user):

@@ -1,37 +1,113 @@
-<div id="track-button-container-{{ item.id }}" class="flex gap-2 relative">
-    {% if not request.user.is_authenticated %}
-        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary rounded-full px-8 shadow-lg shadow-primary/30">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            Sign in to Track
-        </a>
+{% if request.user.is_authenticated %}
+<div id="track-button-container-{{ item.id }}"
+     class="cx-detail-actions"
+     x-data="{ menu: false, sub: false }"
+     @click.outside="menu = false; sub = false">
+
+  <button class="cx-btn cx-btn-primary" @click="menu = !menu">
+    {% if watch_item %}
+      {% if watch_item.status == 'plan_to_watch' %}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        Plan to Watch
+      {% elif watch_item.status == 'watching' %}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Watching
+      {% elif watch_item.status == 'completed' %}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Completed
+      {% endif %}
     {% else %}
-        <!-- Status Dropdown Form -->
-        <form hx-post="{% url 'lists:toggle' item.id %}" hx-target="#track-button-container-{{ item.id }}" hx-swap="outerHTML">
-            {% csrf_token %}
-            <div class="dropdown">
-                {% if watch_item %}
-                    {% if watch_item.status == 'plan_to_watch' %}
-                        <div tabindex="0" role="button" class="btn btn-info rounded-full px-8 shadow-lg shadow-info/30 hover:scale-105 transition-transform">Plan to Watch</div>
-                    {% elif watch_item.status == 'watching' %}
-                        <div tabindex="0" role="button" class="btn btn-warning rounded-full px-8 shadow-lg shadow-warning/30 hover:scale-105 transition-transform">Watching</div>
-                    {% elif watch_item.status == 'completed' %}
-                        <div tabindex="0" role="button" class="btn btn-success rounded-full px-8 shadow-lg shadow-success/30 hover:scale-105 transition-transform">Completed</div>
-                    {% endif %}
-                {% else %}
-                    <div tabindex="0" role="button" class="btn btn-primary rounded-full px-8 shadow-lg shadow-primary/30 hover:scale-105 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        Add to List
-                    </div>
-                {% endif %}
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-gray-800 border border-gray-700 rounded-box w-52 mt-2">
-                    <li><button type="submit" name="status" value="plan_to_watch" class="hover:bg-info/20 text-info">Plan to Watch</button></li>
-                    <li><button type="submit" name="status" value="watching" class="hover:bg-warning/20 text-warning">Watching</button></li>
-                    <li><button type="submit" name="status" value="completed" class="hover:bg-success/20 text-success">Completed</button></li>
-                    {% if watch_item %}
-                        <li class="mt-2 border-t border-gray-700"><button type="submit" name="status" value="none" class="hover:bg-error/20 text-error">Remove</button></li>
-                    {% endif %}
-                </ul>
-            </div>
-        </form>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Add to List
     {% endif %}
+  </button>
+
+  <div class="cx-list-menu" x-show="menu" x-cloak>
+    <button class="cx-list-menu-item plan"
+            hx-post="{% url 'lists:toggle' item.id %}"
+            hx-vals='{"status": "plan_to_watch"}'
+            hx-target="#track-button-container-{{ item.id }}"
+            hx-swap="outerHTML"
+            @click="menu = false">
+      <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></span>
+      Plan to Watch
+      <span class="right">→ Plan List</span>
+    </button>
+    <button class="cx-list-menu-item watching"
+            hx-post="{% url 'lists:toggle' item.id %}"
+            hx-vals='{"status": "watching"}'
+            hx-target="#track-button-container-{{ item.id }}"
+            hx-swap="outerHTML"
+            @click="menu = false">
+      <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Watching
+      <span class="right">→ Watching List</span>
+    </button>
+    <button class="cx-list-menu-item completed"
+            hx-post="{% url 'lists:toggle' item.id %}"
+            hx-vals='{"status": "completed"}'
+            hx-target="#track-button-container-{{ item.id }}"
+            hx-swap="outerHTML"
+            @click="menu = false">
+      <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></span>
+      Completed
+      <span class="right">→ Completed List</span>
+    </button>
+    {% if watch_item %}
+    <button class="cx-list-menu-item"
+            hx-post="{% url 'lists:toggle' item.id %}"
+            hx-vals='{"status": "none"}'
+            hx-target="#track-button-container-{{ item.id }}"
+            hx-swap="outerHTML"
+            @click="menu = false"
+            style="color:#f87171">
+      <span class="icon" style="background:rgba(248,113,113,0.15)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></span>
+      Remove from List
+    </button>
+    {% endif %}
+
+    <div class="cx-dropdown-divider"></div>
+
+    {# Custom list sub-menu #}
+    <div class="cx-list-menu-item custom"
+         style="position:relative"
+         @mouseenter="sub = true"
+         @mouseleave="sub = false">
+      <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+      Add to Custom List
+      <span class="right"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+
+      <div class="cx-custom-sub" x-show="sub" x-cloak>
+        <div class="cx-dropdown-label">Your Lists</div>
+        {% for cl in request.user.custom_lists.all|slice:":5" %}
+        <button class="cx-dropdown-item"
+                hx-post="{% url 'lists:add_to_list' item.tmdb_id %}"
+                hx-vals='{"list_id": "{{ cl.id }}"}'
+                hx-target="#add-to-list-feedback"
+                hx-swap="innerHTML"
+                @click="menu = false; sub = false">
+          {{ cl.name }}
+          <span style="margin-left:auto;color:var(--text-3);font-size:11px">{{ cl.list_items.count }}</span>
+        </button>
+        {% empty %}
+        <div style="padding:8px 12px;font-size:13px;color:var(--text-3)">No lists yet</div>
+        {% endfor %}
+        <div class="cx-dropdown-divider"></div>
+        <a href="{% url 'lists:custom_list_create' %}" class="cx-dropdown-item" style="color:var(--primary-soft);font-weight:600">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Create new list
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <span id="add-to-list-feedback" style="font-size:13px;color:var(--accent-mint);align-self:center"></span>
 </div>
+{% else %}
+<div class="cx-detail-actions">
+  <a href="{% url 'login' %}?next={{ request.path }}" class="cx-btn cx-btn-primary">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Sign In to Track
+  </a>
+</div>
+{% endif %}

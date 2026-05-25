@@ -1,33 +1,5 @@
 {% if error %}
-<div x-data="{ addOpen: true }" @click.outside="addOpen = false" class="absolute inset-x-0 bottom-0 z-20 bg-gray-900/95 p-3 text-xs">
-    <p class="text-error">{{ error }}</p>
-</div>
+<span style="color:var(--accent-pink);font-size:13px">{{ error }}</span>
 {% else %}
-<div x-data="{ addOpen: true }" @click.outside="addOpen = false" class="absolute inset-x-0 bottom-0 z-20 bg-gray-900/95 p-3 text-xs">
-    <p class="text-green-400 font-semibold">Added to "{{ custom_list.name }}"</p>
-    <div class="space-y-1 mt-2 max-h-28 overflow-y-auto">
-        {% for lst in user_lists %}
-        {% if lst.pk != custom_list.pk %}
-        <form hx-post="{% url 'lists:add_to_list' content_item.pk %}"
-              hx-target="closest [x-data]"
-              hx-swap="outerHTML">
-            {% csrf_token %}
-            <input type="hidden" name="list_id" value="{{ lst.pk }}">
-            <button type="submit" class="btn btn-ghost btn-xs w-full justify-start text-left text-gray-300 hover:text-white">
-                {{ lst.name }}
-            </button>
-        </form>
-        {% endif %}
-        {% endfor %}
-    </div>
-    <form hx-post="{% url 'lists:add_to_list' content_item.pk %}"
-          hx-target="closest [x-data]"
-          hx-swap="outerHTML"
-          class="flex gap-1 mt-2">
-        {% csrf_token %}
-        <input type="text" name="list_name" placeholder="New list name…"
-            class="input input-xs input-bordered flex-1 bg-gray-800 border-gray-600 text-xs" required>
-        <button type="submit" class="btn btn-xs btn-primary">+</button>
-    </form>
-</div>
+<span style="color:var(--accent-mint);font-size:13px">Added to "{{ custom_list.name }}"</span>
 {% endif %}

@@ -1,66 +1,61 @@
 {% extends 'base.html' %}
-{% block title %}Discover – Cinemix{% endblock %}
+{% block title %}Discover — Cinemix{% endblock %}
 
 {% block content %}
-<div class="pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-    <h1 class="text-3xl font-bold mb-2">Advanced Search</h1>
-    <p class="text-gray-400 mb-8">Filter movies and TV shows by year, country, genre, and rating.</p>
+<div class="cx-page-head">
+  <h1 class="cx-page-title">Discover</h1>
+  <p class="cx-page-sub">Filter movies and TV shows by type, year, country, genre, and rating.</p>
+</div>
 
-    <form hx-post="{% url 'content:discover' %}"
-          hx-target="#discover-results"
-          hx-indicator="#discover-spinner"
-          class="glass-panel rounded-2xl p-6 mb-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 items-end">
-        {% csrf_token %}
+<form hx-post="{% url 'content:discover' %}"
+      hx-target="#discover-results"
+      hx-swap="innerHTML"
+      class="cx-discover-form">
+  {% csrf_token %}
+  <div>
+    <label class="cx-discover-label">Type</label>
+    <select name="media_type" class="cx-discover-select">
+      <option value="movie">Movie</option>
+      <option value="tv">TV Show</option>
+    </select>
+  </div>
+  <div>
+    <label class="cx-discover-label">Year</label>
+    <input type="number" name="year" min="1900" max="2030" placeholder="Any" class="cx-discover-input">
+  </div>
+  <div>
+    <label class="cx-discover-label">Country</label>
+    <input type="text" name="country" placeholder="e.g. US, KR" maxlength="4" class="cx-discover-input">
+  </div>
+  <div>
+    <label class="cx-discover-label">Genre</label>
+    <select name="genre_id" class="cx-discover-select">
+      <option value="">Any</option>
+      {% for genre in genres %}
+      <option value="{{ genre.id }}">{{ genre.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="cx-discover-label">Min Rating</label>
+    <select name="min_rating" class="cx-discover-select">
+      <option value="">Any</option>
+      <option value="5">5+</option>
+      <option value="6">6+</option>
+      <option value="7">7+</option>
+      <option value="8">8+</option>
+      <option value="9">9+</option>
+    </select>
+  </div>
+  <div style="align-self:flex-end">
+    <button type="submit" class="cx-btn cx-btn-primary" style="width:100%">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      Search
+    </button>
+  </div>
+</form>
 
-        <div>
-            <label class="label pb-1"><span class="label-text text-gray-300 text-xs uppercase tracking-wider">Type</span></label>
-            <select name="media_type" class="select select-bordered w-full bg-gray-800 border-gray-700 text-sm">
-                <option value="movie">Movie</option>
-                <option value="tv">TV Show</option>
-            </select>
-        </div>
-
-        <div>
-            <label class="label pb-1"><span class="label-text text-gray-300 text-xs uppercase tracking-wider">Year</span></label>
-            <input type="number" name="year" min="1900" max="2030" placeholder="Any"
-                class="input input-bordered w-full bg-gray-800 border-gray-700 text-sm">
-        </div>
-
-        <div>
-            <label class="label pb-1"><span class="label-text text-gray-300 text-xs uppercase tracking-wider">Country</span></label>
-            <input type="text" name="country" placeholder="e.g. US, GB, KR" maxlength="4"
-                class="input input-bordered w-full bg-gray-800 border-gray-700 text-sm">
-        </div>
-
-        <div>
-            <label class="label pb-1"><span class="label-text text-gray-300 text-xs uppercase tracking-wider">Genre</span></label>
-            <select name="genre_id" class="select select-bordered w-full bg-gray-800 border-gray-700 text-sm">
-                <option value="">Any</option>
-                {% for genre in genres %}
-                <option value="{{ genre.id }}">{{ genre.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div>
-            <label class="label pb-1"><span class="label-text text-gray-300 text-xs uppercase tracking-wider">Min Rating</span></label>
-            <select name="min_rating" class="select select-bordered w-full bg-gray-800 border-gray-700 text-sm">
-                <option value="">Any</option>
-                {% for r in "5678" %}
-                <option value="{{ r }}">{{ r }}+</option>
-                {% endfor %}
-                <option value="9">9+</option>
-            </select>
-        </div>
-
-        <div class="col-span-2 sm:col-span-3 lg:col-span-5 flex justify-end gap-3">
-            <span id="discover-spinner" class="loading loading-spinner loading-sm text-primary htmx-indicator"></span>
-            <button type="submit" class="btn btn-primary px-8">Search</button>
-        </div>
-    </form>
-
-    <div id="discover-results">
-        {% include 'content/partials/discover_results.html' %}
-    </div>
+<div id="discover-results" class="cx-section" style="padding-top:10px;padding-bottom:80px">
+  {% include 'content/partials/discover_results.html' %}
 </div>
 {% endblock %}

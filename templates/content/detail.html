@@ -1,41 +1,138 @@
 {% extends 'base.html' %}
+{% block title %}{{ item.title }} — Cinemix{% endblock %}
+
 {% block content %}
-<div class="relative w-full min-h-[70vh] bg-gray-900">
-    <!-- Backdrop Image -->
-    {% if item.poster_path %}
-    <div class="absolute inset-0 z-0">
-        <img src="https://image.tmdb.org/t/p/original{{ item.poster_path }}" class="w-full h-full object-cover opacity-20 filter blur-md" alt="Backdrop">
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/80 to-gray-900"></div>
+<div style="position:relative;min-height:700px">
+  {# ── Backdrop ─────────────────────────────────────────────── #}
+  {% if backdrop_path %}
+  <div class="cx-detail-backdrop" style="height:700px">
+    <img src="https://image.tmdb.org/t/p/original{{ backdrop_path }}" alt="{{ item.title }} backdrop">
+  </div>
+  {% elif item.poster_path %}
+  <div class="cx-detail-backdrop" style="height:700px">
+    <img src="https://image.tmdb.org/t/p/w780{{ item.poster_path }}" alt="{{ item.title }}">
+  </div>
+  {% endif %}
+
+  <div class="cx-detail">
+    {# ── Poster column ─────────────────────────────────────── #}
+    <div>
+      <div class="cx-detail-poster">
+        {% if item.poster_path %}
+          <img src="https://image.tmdb.org/t/p/w500{{ item.poster_path }}" alt="{{ item.title }}">
+        {% elif item.custom_poster %}
+          <img src="{{ item.custom_poster.url }}" alt="{{ item.title }}">
+        {% else %}
+          <div class="cx-poster-placeholder" style="height:100%">{{ item.title }}</div>
+        {% endif %}
+      </div>
     </div>
-    {% endif %}
 
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 flex flex-col md:flex-row gap-10">
-        <!-- Poster -->
-        <div class="flex-shrink-0 w-64 md:w-80 mx-auto md:mx-0">
-            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-primary/20 border border-gray-700 bg-gray-800">
-                {% if item.poster_path %}
-                    <img src="https://image.tmdb.org/t/p/w500{{ item.poster_path }}" alt="{{ item.title }}" class="w-full h-auto object-cover">
-                {% else %}
-                    <div class="w-full aspect-[2/3] flex items-center justify-center">
-                        <span class="text-gray-500">No Image</span>
-                    </div>
-                {% endif %}
-            </div>
+    {# ── Main column ───────────────────────────────────────── #}
+    <div class="cx-detail-main">
+      <span class="cx-detail-kicker">
+        {% if item.contnt_type == 'movie' %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg>
+          Movie
+        {% else %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
+          TV Show
+        {% endif %}
+      </span>
+
+      <h1 class="cx-detail-title">{{ item.title }}</h1>
+
+      {% if tagline %}
+      <div class="cx-detail-tagline">"{{ tagline }}"</div>
+      {% endif %}
+
+      <div class="cx-detail-meta">
+        {% if item.release_date %}<span>{{ item.release_date|date:"Y" }}</span>{% endif %}
+        {% if runtime %}<div class="dot"></div><span>{{ runtime }} min</span>{% endif %}
+        {% if director %}<div class="dot"></div><span>Dir. {{ director }}</span>{% endif %}
+      </div>
+
+      {% if genres %}
+      <div class="cx-chips">
+        {% for genre in genres %}
+        <span class="cx-chip">{{ genre.name }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# ── Rating row ─────────────────────────────────────── #}
+      <div class="cx-rating-row">
+        <div class="cx-rating-block">
+          <div class="cx-rating-num">{{ item.vote_average|floatformat:1|default:"—" }}</div>
+          <div>
+            <div class="cx-rating-label">Community</div>
+            <div class="cx-rating-sub">{{ vote_count|default:"0" }} ratings</div>
+          </div>
         </div>
-
-        <!-- Details -->
-        <div class="flex-1 text-center md:text-left pt-4">
-            <div class="badge badge-primary badge-lg uppercase font-bold tracking-widest mb-4">{{ item.get_contnt_type_display }}</div>
-            <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-2">{{ item.title }}</h1>
-            <p class="text-xl text-gray-400 font-light mb-8">{{ item.release_date|date:"Y"|default:"Unknown" }}</p>
-            
-            <h3 class="text-2xl font-semibold text-gray-200 mb-3">Overview</h3>
-            <p class="text-lg text-gray-300 leading-relaxed max-w-3xl">{{ item.overview }}</p>
-
-            <div class="mt-10 flex gap-4 justify-center md:justify-start">
-                {% include 'lists/partials/track_button.html' %}
+        <div style="width:1px;height:48px;background:var(--border)"></div>
+        <div class="cx-rating-block">
+          <div>
+            <div class="cx-rating-label" style="margin-bottom:6px">My Rating</div>
+            {% if request.user.is_authenticated %}
+            <div id="star-rating-{{ item.id }}"
+                 x-data="{ rating: {{ watch_item.rating|default:0 }}, hover: 0 }"
+                 style="display:flex;flex-direction:column;gap:4px">
+              <div class="cx-stars">
+                {% for n in "1234567890" %}{% with forloop.counter as n %}
+                <span class="cx-star"
+                      :class="{ filled: (hover || rating) >= {{ n }} }"
+                      @mouseenter="hover = {{ n }}"
+                      @mouseleave="hover = 0"
+                      hx-post="{% url 'lists:toggle' item.id %}"
+                      hx-vals='{"rating": "{{ n }}"}'
+                      hx-target="#star-rating-{{ item.id }}"
+                      hx-swap="outerHTML"
+                      @click="rating = {{ n }}"
+                      style="cursor:pointer">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </span>
+                {% endwith %}{% endfor %}
+              </div>
+              <div class="cx-rating-sub" style="font-size:11px">
+                <span x-text="rating > 0 ? rating + '/10' : 'Click a star to rate'"></span>
+              </div>
             </div>
+            {% else %}
+            <div style="color:var(--text-3);font-size:13px">
+              <a href="{% url 'login' %}?next={{ request.path }}" style="color:var(--primary-soft)">Sign in</a> to rate
+            </div>
+            {% endif %}
+          </div>
         </div>
+      </div>
+
+      {# ── Actions ─────────────────────────────────────────── #}
+      {% include 'lists/partials/track_button.html' %}
+
+      {# ── Overview ────────────────────────────────────────── #}
+      <h2 class="cx-section-h">Overview</h2>
+      <p class="cx-overview">{{ item.overview }}</p>
+
+      {# ── Cast ────────────────────────────────────────────── #}
+      {% if cast %}
+      <h2 class="cx-section-h">Main Cast</h2>
+      <div class="cx-cast-grid">
+        {% for member in cast %}
+        <div class="cx-cast-card">
+          <div class="cx-cast-avatar">
+            {% if member.profile_path %}
+              <img src="https://image.tmdb.org/t/p/w185{{ member.profile_path }}" alt="{{ member.name }}">
+            {% else %}
+              {{ member.name|first }}
+            {% endif %}
+          </div>
+          <div class="cx-cast-name">{{ member.name }}</div>
+          <div class="cx-cast-role">{{ member.character }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
+  </div>
 </div>
 {% endblock %}

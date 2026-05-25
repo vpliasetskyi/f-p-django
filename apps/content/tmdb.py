@@ -55,7 +55,37 @@ def get_genres():
     return genres
 
 
-def discover_media(media_type='movie', year=None, country=None, genre_id=None, min_rating=None, page=1):
+def get_credits(tmdb_id, content_type='movie'):
+    if not TMDB_API_KEY:
+        logger.warning("TMDB API Key is not set.")
+        return {'cast': [], 'crew': []}
+    url = f"{TMDB_BASE_URL}/{content_type}/{tmdb_id}/credits"
+    params = {'api_key': TMDB_API_KEY, 'language': 'en-US'}
+    try:
+        response = httpx.get(url, params=params, timeout=5.0)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error fetching credits: {e}")
+        return {'cast': [], 'crew': []}
+
+
+def search_people(query):
+    if not TMDB_API_KEY:
+        return None
+    url = f"{TMDB_BASE_URL}/search/person"
+    params = {'api_key': TMDB_API_KEY, 'query': query, 'language': 'en-US', 'page': 1}
+    try:
+        response = httpx.get(url, params=params, timeout=5.0)
+        response.raise_for_status()
+        results = response.json().get('results', [])
+        return results[0]['id'] if results else None
+    except Exception as e:
+        logger.error(f"Error searching person: {e}")
+        return None
+
+
+def discover_media(media_type='movie', year=None, country=None, genre_id=None, min_rating=None, page=1, with_people=None):
     if not TMDB_API_KEY:
         logger.warning("TMDB API Key is not set.")
         return []
@@ -77,6 +107,8 @@ def discover_media(media_type='movie', year=None, country=None, genre_id=None, m
         params['with_genres'] = genre_id
     if min_rating:
         params['vote_average.gte'] = min_rating
+    if with_people:
+        params['with_people'] = with_people
 
     try:
         response = httpx.get(url, params=params, timeout=5.0)

@@ -32,7 +32,13 @@ class ProfileDetailView(DetailView):
         user = self.object
         if user.profile.is_public or (self.request.user.is_authenticated and self.request.user == user):
             from apps.lists.models import WatchItem
-            context['watch_items'] = WatchItem.objects.filter(user=user).select_related('contnt_item').order_by('-updated_at')
+            from django.db.models import Avg
+            qs = WatchItem.objects.filter(user=user).select_related('contnt_item').order_by('-updated_at')
+            context['watch_items'] = qs
+            context['watched_count'] = qs.filter(status='completed').count()
+            context['plan_count'] = qs.filter(status='plan_to_watch').count()
+            avg = qs.filter(rating__isnull=False).aggregate(avg=Avg('rating'))['avg']
+            context['avg_rating'] = round(avg, 1) if avg else None
         else:
             context['watch_items'] = None
             context['is_private'] = True
