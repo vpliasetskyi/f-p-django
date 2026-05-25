@@ -29,7 +29,11 @@ class Migration(migrations.Migration):
             name='customlistitem',
             unique_together={('custom_list', 'content_item')},
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
+            model_name='customlist',
+            name='items',
+        ),
+        migrations.AddField(
             model_name='customlist',
             name='items',
             field=models.ManyToManyField(blank=True, related_name='in_lists', through='lists.CustomListItem', to='content.contentitem'),
