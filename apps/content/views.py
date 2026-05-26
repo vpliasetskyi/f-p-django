@@ -18,36 +18,34 @@ class HomeView(ListView):
         context = super().get_context_data(**kwargs)
         context['highest_rated'] = ContentItem.objects.order_by('-vote_average')[:12]
 
-        # Slider: last 4 DB items with TMDB backdrops
-        recent = list(ContentItem.objects.order_by('-created_at')[:4])
-        slider_items = []
-        for item in recent:
-            details = tmdb.get_details(item.tmdb_id, item.contnt_type) or {}
-            slider_items.append({
-                'backdrop_path': details.get('backdrop_path', ''),
-                'title': item.title,
-                'overview': item.overview,
-                'vote_average': item.vote_average,
-                'release_year': item.release_date.year if item.release_date else '',
-                'tmdb_id': item.tmdb_id,
-                'contnt_type': item.contnt_type,
-                'type_display': item.get_contnt_type_display(),
-            })
-        context['slider_items'] = slider_items
-
-        # Recently Added: custom list items for logged-in, popular TMDB for guests
+        # Slider + Recently Added share the same source for logged-in users
         if self.request.user.is_authenticated:
             seen = set()
-            items = []
+            user_items = []
             for cli in CustomListItem.objects.filter(
                 custom_list__user=self.request.user
             ).select_related('content_item').order_by('-id'):
                 if cli.content_item_id not in seen:
                     seen.add(cli.content_item_id)
-                    items.append(cli.content_item)
-                    if len(items) >= 12:
+                    user_items.append(cli.content_item)
+                    if len(user_items) >= 12:
                         break
-            context['recent_items'] = items
+            context['recent_items'] = user_items
+
+            slider_items = []
+            for item in user_items[:4]:
+                details = tmdb.get_details(item.tmdb_id, item.contnt_type) or {}
+                slider_items.append({
+                    'backdrop_path': details.get('backdrop_path', ''),
+                    'title': item.title,
+                    'overview': item.overview,
+                    'vote_average': item.vote_average,
+                    'release_year': item.release_date.year if item.release_date else '',
+                    'tmdb_id': item.tmdb_id,
+                    'contnt_type': item.contnt_type,
+                    'type_display': item.get_contnt_type_display(),
+                })
+            context['slider_items'] = slider_items
         else:
             raw = tmdb.discover_media(media_type='movie')[:12]
             context['recent_items'] = [
