@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}{{ status_label }} — Cinemix{% endblock %}
+
+{% block content %}
+<div class="cx-cl-form" x-data="{ popupOpen: false }"
+     @open-item-popup.window="popupOpen = true"
+     @close-item-popup.window="popupOpen = false">
+
+  {# ── Header ─────────────────────────────────────────── #}
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px">
+    <div style="flex:1">
+      <h1 class="cx-page-title" style="margin-bottom:4px">{{ status_label }}</h1>
+      <p class="cx-page-sub" id="dl-count">{{ items|length }} title{{ items|length|pluralize }}</p>
+    </div>
+    <a href="{% url 'lists:my_list' %}" class="cx-btn cx-btn-secondary">Back to My Lists</a>
+  </div>
+
+  {# ── Items ─────────────────────────────────────────── #}
+  <div class="cx-cl-added-section">
+    <div id="dl-items">
+      {% include 'lists/partials/dl_items.html' %}
+    </div>
+  </div>
+
+  {# ── Item edit popup ───────────────────────────────────── #}
+  <div class="cx-cl-popup-overlay" x-show="popupOpen" x-cloak @click.self="popupOpen = false">
+    <div class="cx-cl-popup" id="dl-popup-content">
+      <!-- loaded via HTMX -->
+    </div>
+  </div>
+</div>
+{% endblock %}

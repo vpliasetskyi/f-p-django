@@ -1,0 +1,42 @@
+{% if items %}
+<h2 class="cx-cl-added-title">{{ status_label }} <span style="font-family:var(--f-mono);font-size:14px;color:var(--text-3);font-weight:400">{{ items|length }}</span></h2>
+{% for wi in items %}
+<div class="cx-cl-item-card">
+  <div class="cx-cl-item-poster">
+    {% if wi.contnt_item.poster_path %}
+      <img src="https://image.tmdb.org/t/p/w185{{ wi.contnt_item.poster_path }}" alt="">
+    {% endif %}
+  </div>
+  <div class="cx-cl-item-info">
+    <div class="cx-cl-item-title">{{ wi.contnt_item.title }}</div>
+    <div class="cx-cl-item-meta">
+      {{ wi.contnt_item.release_date|date:"Y"|default:"" }}
+      {% if wi.status == 'plan_to_watch' %}<span style="color:#7dd3fc"> · Plan</span>{% endif %}
+      {% if wi.status == 'watching' %}<span style="color:#fbbf24"> · Watching</span>{% endif %}
+      {% if wi.status == 'completed' %}<span style="color:#4ade80"> · Done</span>{% endif %}
+      {% if wi.rating %}<span style="color:var(--accent-warm)"> · ★ {{ wi.rating }}</span>{% endif %}
+    </div>
+  </div>
+  <div class="cx-cl-item-actions">
+    <button class="cx-btn-icon" title="Edit item"
+            hx-get="{% url 'lists:default_list_item_edit' status wi.pk %}"
+            hx-target="#dl-popup-content"
+            hx-swap="innerHTML"
+            @click="$dispatch('open-item-popup')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </button>
+    <button class="cx-btn-icon" style="color:#f87171" title="Remove"
+            hx-post="{% url 'lists:default_list_remove_item' status wi.pk %}"
+            hx-target="#dl-items"
+            hx-swap="innerHTML">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div style="padding:40px;text-align:center;border:2px dashed var(--border);border-radius:16px;color:var(--text-3)">
+  <p style="font-size:15px;margin-bottom:8px">No items here yet</p>
+  <p style="font-size:13px">Items you track will appear here.</p>
+</div>
+{% endif %}
