@@ -85,16 +85,19 @@ def search_people(query):
         return None
 
 
-def discover_media(media_type='movie', year=None, country=None, genre_id=None, min_rating=None, page=1, with_people=None):
+def discover_media(media_type='movie', year=None, country=None, genre_id=None, min_rating=None, page=1, with_people=None, sort_by=None):
     if not TMDB_API_KEY:
         logger.warning("TMDB API Key is not set.")
         return []
 
     url = f"{TMDB_BASE_URL}/discover/{media_type}"
+    actual_sort = sort_by or 'popularity.desc'
+    if actual_sort == 'release_date.desc':
+        actual_sort = 'primary_release_date.desc' if media_type == 'movie' else 'first_air_date.desc'
     params = {
         'api_key': TMDB_API_KEY,
         'language': 'en-US',
-        'sort_by': 'popularity.desc',
+        'sort_by': actual_sort,
         'page': page,
         'include_adult': 'false',
     }
