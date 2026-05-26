@@ -2,26 +2,28 @@
 <h2 class="cx-cl-added-title">Added Items <span style="font-family:var(--f-mono);font-size:14px;color:var(--text-3);font-weight:400">{{ list_items|length }}</span></h2>
 {% for li in list_items %}
 <div class="cx-cl-item-card">
-  <div class="cx-cl-item-poster">
-    {% if li.custom_poster %}
-      <img src="{{ li.custom_poster.url }}" alt="">
-    {% elif li.content_item.poster_path %}
-      <img src="https://image.tmdb.org/t/p/w185{{ li.content_item.poster_path }}" alt="">
-    {% endif %}
-  </div>
-  <div class="cx-cl-item-info">
-    <div class="cx-cl-item-title">{% if li.custom_title %}{{ li.custom_title }}{% else %}{{ li.content_item.title }}{% endif %}</div>
-    <div class="cx-cl-item-meta">
-      {{ li.content_item.release_date|date:"Y"|default:"" }}
-      {# check rating/status from watch_items_map passed as context #}
-      {% for key, wi in watch_items_map.items %}{% if key == li.content_item.id %}
-        {% if wi.status == 'plan_to_watch' %}<span style="color:#7dd3fc"> · Plan</span>{% endif %}
-        {% if wi.status == 'watching' %}<span style="color:#fbbf24"> · Watching</span>{% endif %}
-        {% if wi.status == 'completed' %}<span style="color:#4ade80"> · Done</span>{% endif %}
-        {% if wi.rating %}<span style="color:var(--accent-warm)"> · ★ {{ wi.rating }}</span>{% endif %}
-      {% endif %}{% endfor %}
+  <a href="{% url 'content:detail' li.content_item.tmdb_id %}?type={{ li.content_item.contnt_type }}"
+     style="display:flex;align-items:center;gap:16px;flex:1;min-width:0;text-decoration:none;color:inherit">
+    <div class="cx-cl-item-poster">
+      {% if li.custom_poster %}
+        <img src="{{ li.custom_poster.url }}" alt="">
+      {% elif li.content_item.poster_path %}
+        <img src="https://image.tmdb.org/t/p/w185{{ li.content_item.poster_path }}" alt="">
+      {% endif %}
     </div>
-  </div>
+    <div class="cx-cl-item-info">
+      <div class="cx-cl-item-title">{% if li.custom_title %}{{ li.custom_title }}{% else %}{{ li.content_item.title }}{% endif %}</div>
+      <div class="cx-cl-item-meta">
+        {{ li.content_item.release_date|date:"Y"|default:"" }}
+        {% for key, wi in watch_items_map.items %}{% if key == li.content_item.id %}
+          {% if wi.status == 'plan_to_watch' %}<span style="color:#7dd3fc"> · Plan</span>{% endif %}
+          {% if wi.status == 'watching' %}<span style="color:#fbbf24"> · Watching</span>{% endif %}
+          {% if wi.status == 'completed' %}<span style="color:#4ade80"> · Done</span>{% endif %}
+          {% if wi.rating %}<span style="color:var(--accent-warm)"> · ★ {{ wi.rating }}</span>{% endif %}
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+  </a>
   <div class="cx-cl-item-actions">
     <button class="cx-btn-icon" title="Edit item"
             hx-get="{% url 'lists:custom_list_item_edit' custom_list.pk li.pk %}"
