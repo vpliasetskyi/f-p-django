@@ -4,6 +4,7 @@ from django.http import Http404
 from datetime import datetime
 from .models import ContentItem
 from . import tmdb
+from apps.lists.models import CustomListItem
 
 class HomeView(ListView):
     model = ContentItem
@@ -11,11 +12,13 @@ class HomeView(ListView):
     context_object_name = 'recent_items'
 
     def get_queryset(self):
-        return ContentItem.objects.order_by('-created_at')[:12]
+        return ContentItem.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['highest_rated'] = ContentItem.objects.order_by('-vote_average')[:12]
+
+        # Slider: last 4 DB items with TMDB backdrops
         recent = list(ContentItem.objects.order_by('-created_at')[:4])
         slider_items = []
         for item in recent:
@@ -31,6 +34,34 @@ class HomeView(ListView):
                 'type_display': item.get_contnt_type_display(),
             })
         context['slider_items'] = slider_items
+
+        # Recently Added: custom list items for logged-in, popular TMDB for guests
+        if self.request.user.is_authenticated:
+            seen = set()
+            items = []
+            for cli in CustomListItem.objects.filter(
+                custom_list__user=self.request.user
+            ).select_related('content_item').order_by('-id'):
+                if cli.content_item_id not in seen:
+                    seen.add(cli.content_item_id)
+                    items.append(cli.content_item)
+                    if len(items) >= 12:
+                        break
+            context['recent_items'] = items
+        else:
+            raw = tmdb.discover_media(media_type='movie')[:12]
+            context['recent_items'] = [
+                {
+                    'poster_path': item.get('poster_path', ''),
+                    'custom_poster': None,
+                    'vote_average': item.get('vote_average'),
+                    'title': item.get('title') or item.get('name', ''),
+                    'tmdb_id': item.get('id'),
+                    'contnt_type': item.get('contnt_type', 'movie'),
+                }
+                for item in raw
+            ]
+
         return context
 
 

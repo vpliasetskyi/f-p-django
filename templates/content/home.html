@@ -69,11 +69,8 @@
   <div class="cx-section-head">
     <div>
       <h2 class="cx-section-title">Recently Added</h2>
-      <p class="cx-section-sub">The latest catalog entries.</p>
+      <p class="cx-section-sub">{% if request.user.is_authenticated %}From your custom lists.{% else %}Popular right now.{% endif %}</p>
     </div>
-    <a href="{% url 'content:discover' %}" class="cx-section-link">
-      View all <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-    </a>
   </div>
   {% if recent_items %}
   <div class="cx-grid">
@@ -92,8 +89,11 @@
     </a>
     {% endfor %}
   </div>
-  {% else %}
-  <p style="color:var(--text-3);text-align:center;padding:60px 0">No content yet. Start by visiting the Discover page.</p>
+  {% elif request.user.is_authenticated %}
+  <p style="color:var(--text-3);text-align:center;padding:60px 0">
+    No items in your custom lists yet.
+    <a href="{% url 'lists:custom_list_create' %}" style="color:var(--primary-soft)">Create a list</a> to get started.
+  </p>
   {% endif %}
 </section>
 
