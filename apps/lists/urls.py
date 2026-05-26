@@ -15,4 +15,7 @@ urlpatterns = [
     path("custom/<int:pk>/remove-item/<int:item_pk>/", views.CustomListRemoveItemView.as_view(), name="custom_list_remove_item"),
     path("custom/<int:pk>/edit-item/<int:item_pk>/", views.CustomListItemEditView.as_view(), name="custom_list_item_edit"),
     path("add-to-list/<int:content_id>/", views.AddToListView.as_view(), name="add_to_list"),
+    path("default/<str:status>/", views.DefaultListDetailView.as_view(), name="default_list_detail"),
+    path("default/<str:status>/edit-item/<int:item_pk>/", views.DefaultListItemEditView.as_view(), name="default_list_item_edit"),
+    path("default/<str:status>/remove-item/<int:item_pk>/", views.DefaultListRemoveItemView.as_view(), name="default_list_remove_item"),
 ]

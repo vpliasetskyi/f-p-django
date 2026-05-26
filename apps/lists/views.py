@@ -3,8 +3,24 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from datetime import datetime
+from .models import WatchItem, CustomList, CustomListItem
+from apps.content.models import ContentItem
+from apps.content import tmdb
+
+_DEFAULT_LIST_LABELS = {
+    'plan_to_watch': 'Plan to Watch',
+    'watching': 'Watching',
+    'completed': 'Completed',
+    'rated': 'Rated',
+}
+
+def _get_default_list_items(user, status):
+    qs = WatchItem.objects.filter(user=user).select_related('contnt_item')
+    if status == 'rated':
+        return qs.filter(rating__isnull=False).order_by('-updated_at')
+    return qs.filter(status=status).order_by('-updated_at')
 
 from .models import WatchItem, CustomList, CustomListItem
 from apps.content.models import ContentItem
@@ -294,6 +310,69 @@ class CustomListItemEditView(LoginRequiredMixin, View):
             'custom_list': custom_list,
             'list_items': list_items,
             'watch_items_map': watch_items_map,
+        })
+
+
+class DefaultListDetailView(LoginRequiredMixin, View):
+    def get(self, request, status):
+        if status not in _DEFAULT_LIST_LABELS:
+            raise Http404
+        items = _get_default_list_items(request.user, status)
+        return render(request, 'lists/default_list_detail.html', {
+            'status': status,
+            'status_label': _DEFAULT_LIST_LABELS[status],
+            'items': items,
+        })
+
+
+class DefaultListItemEditView(LoginRequiredMixin, View):
+    def get(self, request, status, item_pk):
+        if status not in _DEFAULT_LIST_LABELS:
+            raise Http404
+        watch_item = get_object_or_404(WatchItem, pk=item_pk, user=request.user)
+        return render(request, 'lists/partials/dl_item_edit_popup.html', {
+            'status': status,
+            'watch_item': watch_item,
+        })
+
+    def post(self, request, status, item_pk):
+        if status not in _DEFAULT_LIST_LABELS:
+            raise Http404
+        watch_item = get_object_or_404(WatchItem, pk=item_pk, user=request.user)
+        update_fields = []
+        new_status = request.POST.get('status', '').strip()
+        if new_status in dict(WatchItem.STATUS_CHOICES):
+            watch_item.status = new_status
+            update_fields.append('status')
+        rating_str = request.POST.get('rating', '').strip()
+        if rating_str:
+            try:
+                rating_val = int(rating_str)
+                if 1 <= rating_val <= 10:
+                    watch_item.rating = rating_val
+                    update_fields.append('rating')
+            except ValueError:
+                pass
+        if update_fields:
+            watch_item.save(update_fields=update_fields)
+        items = _get_default_list_items(request.user, status)
+        return render(request, 'lists/partials/dl_items.html', {
+            'status': status,
+            'status_label': _DEFAULT_LIST_LABELS[status],
+            'items': items,
+        })
+
+
+class DefaultListRemoveItemView(LoginRequiredMixin, View):
+    def post(self, request, status, item_pk):
+        if status not in _DEFAULT_LIST_LABELS:
+            raise Http404
+        WatchItem.objects.filter(pk=item_pk, user=request.user).delete()
+        items = _get_default_list_items(request.user, status)
+        return render(request, 'lists/partials/dl_items.html', {
+            'status': status,
+            'status_label': _DEFAULT_LIST_LABELS[status],
+            'items': items,
         })
 
 
