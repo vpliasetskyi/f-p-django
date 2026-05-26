@@ -124,7 +124,34 @@ class AdvancedSearchView(View):
         genres_data = tmdb.get_genres()
         all_genres = {g['id']: g['name'] for g in genres_data.get('movie', []) + genres_data.get('tv', [])}
         unique_genres = [{'id': k, 'name': v} for k, v in sorted(all_genres.items(), key=lambda x: x[1])]
-        context = {'genres': unique_genres, 'results': []}
+
+        media_type = request.GET.get('media_type', 'movie')
+        year = request.GET.get('year') or None
+        country = request.GET.get('country') or None
+        genre_id = request.GET.get('genre_id') or None
+        min_rating = request.GET.get('min_rating') or None
+        sort_by = request.GET.get('sort_by') or None
+
+        results = []
+        if request.GET:
+            results = tmdb.discover_media(
+                media_type=media_type,
+                year=year,
+                country=country,
+                genre_id=genre_id,
+                min_rating=min_rating,
+                sort_by=sort_by,
+            )
+
+        context = {
+            'genres': unique_genres,
+            'results': results,
+            'selected_media_type': media_type,
+            'selected_year': year or '',
+            'selected_country': country or '',
+            'selected_genre_id': genre_id or '',
+            'selected_min_rating': min_rating or '',
+        }
         return render(request, 'content/advanced_search.html', context)
 
     def post(self, request):
@@ -133,6 +160,7 @@ class AdvancedSearchView(View):
         country = request.POST.get('country') or None
         genre_id = request.POST.get('genre_id') or None
         min_rating = request.POST.get('min_rating') or None
+        sort_by = request.POST.get('sort_by') or None
 
         results = tmdb.discover_media(
             media_type=media_type,
@@ -140,5 +168,6 @@ class AdvancedSearchView(View):
             country=country,
             genre_id=genre_id,
             min_rating=min_rating,
+            sort_by=sort_by,
         )
         return render(request, 'content/partials/discover_results.html', {'results': results})
