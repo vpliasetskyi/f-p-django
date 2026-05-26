@@ -16,6 +16,20 @@ class HomeView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['highest_rated'] = ContentItem.objects.order_by('-vote_average')[:12]
+        raw = tmdb.discover_media(media_type='movie', year=2026)[:4]
+        context['slider_items'] = [
+            {
+                'backdrop_path': item.get('backdrop_path'),
+                'title': item.get('title') or item.get('name', ''),
+                'overview': item.get('overview', ''),
+                'vote_average': item.get('vote_average'),
+                'release_year': (item.get('release_date') or item.get('first_air_date') or '')[:4],
+                'tmdb_id': item.get('id'),
+                'contnt_type': item.get('contnt_type', 'movie'),
+                'type_display': 'Movie' if item.get('contnt_type') == 'movie' else 'TV Show',
+            }
+            for item in raw
+        ]
         return context
 
 

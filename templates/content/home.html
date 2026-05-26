@@ -4,23 +4,23 @@
 {% block content %}
 {% if request.user.is_authenticated %}
   {# ── Hero slider (logged-in) ─────────────────────────────── #}
-  {% if recent_items %}
+  {% if slider_items %}
   <div class="cx-slider-hero"
-       x-data="{ slide: 0, items: {{ recent_items|length }} }"
+       x-data="{ slide: 0, items: {{ slider_items|length }} }"
        x-init="setInterval(() => slide = (slide + 1) % Math.min(items, 4), 6500)">
-    {% for item in recent_items|slice:":4" %}
+    {% for item in slider_items %}
     <div class="cx-slide" :class="{ active: slide === {{ forloop.counter0 }} }">
       <div class="cx-slide-bg">
-        {% if item.poster_path %}
-          <img src="https://image.tmdb.org/t/p/original{{ item.poster_path }}" alt="{{ item.title }}">
+        {% if item.backdrop_path %}
+          <img src="https://image.tmdb.org/t/p/original{{ item.backdrop_path }}" alt="{{ item.title }}">
         {% else %}
           <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--bg-2),var(--primary) 200%)"></div>
         {% endif %}
       </div>
       <div class="cx-slide-content">
         <div class="cx-slide-meta">
-          <span style="background:rgba(124,92,255,0.2);color:var(--primary-soft);padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;font-size:11px">{{ item.get_contnt_type_display }}</span>
-          {% if item.release_date %}<span>{{ item.release_date|date:"Y" }}</span>{% endif %}
+          <span style="background:rgba(124,92,255,0.2);color:var(--primary-soft);padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;font-size:11px">{{ item.type_display }}</span>
+          {% if item.release_year %}<span>{{ item.release_year }}</span>{% endif %}
           {% if item.vote_average %}<span>·</span><span style="color:var(--accent-warm)">★ {{ item.vote_average|floatformat:1 }}</span>{% endif %}
         </div>
         <h2 class="cx-slide-title">{{ item.title }}</h2>
@@ -37,7 +37,7 @@
     </div>
     {% endfor %}
     <div class="cx-slider-dots">
-      {% for item in recent_items|slice:":4" %}
+      {% for item in slider_items %}
       <button class="cx-slider-dot" :class="{ active: slide === {{ forloop.counter0 }} }" @click="slide = {{ forloop.counter0 }}"></button>
       {% endfor %}
     </div>
