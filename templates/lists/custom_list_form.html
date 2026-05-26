@@ -17,14 +17,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
           Save List
         </button>
-        {% if is_new %}
-        <form method="post" action="{% url 'lists:custom_list_delete' custom_list.pk %}" style="margin:0">
-          {% csrf_token %}
-          <button type="submit" class="cx-btn cx-btn-secondary">Cancel</button>
-        </form>
-        {% else %}
         <a href="{% url 'lists:my_list' %}" class="cx-btn cx-btn-secondary">Cancel</a>
-        {% endif %}
       </div>
     </div>
   </form>
