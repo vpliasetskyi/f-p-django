@@ -115,6 +115,24 @@ class CloneWatchListView(LoginRequiredMixin, View):
         return redirect('lists:my_list')
 
 
+class CustomListDetailView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        custom_list = get_object_or_404(CustomList, pk=pk, user=request.user)
+        list_items = list(custom_list.list_items.select_related('content_item').all())
+        watch_items_map = {
+            wi.contnt_item_id: wi
+            for wi in WatchItem.objects.filter(
+                user=request.user,
+                contnt_item__in=[li.content_item for li in list_items],
+            )
+        } if list_items else {}
+        return render(request, 'lists/custom_list_detail.html', {
+            'custom_list': custom_list,
+            'list_items': list_items,
+            'watch_items_map': watch_items_map,
+        })
+
+
 class CustomListCreateView(LoginRequiredMixin, View):
     def get(self, request):
         custom_list = CustomList.objects.create(user=request.user, name='New List')

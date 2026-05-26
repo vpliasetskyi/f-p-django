@@ -8,6 +8,7 @@ urlpatterns = [
     path("toggle/<int:content_id>/", views.WatchItemToggleView.as_view(), name="toggle"),
     path("clone/<str:username>/", views.CloneWatchListView.as_view(), name="clone"),
     path("custom/create/", views.CustomListCreateView.as_view(), name="custom_list_create"),
+    path("custom/<int:pk>/", views.CustomListDetailView.as_view(), name="custom_list_detail"),
     path("custom/<int:pk>/edit/", views.CustomListUpdateView.as_view(), name="custom_list_update"),
     path("custom/<int:pk>/delete/", views.CustomListDeleteView.as_view(), name="custom_list_delete"),
     path("custom/<int:pk>/search/", views.CustomListTMDBSearchView.as_view(), name="custom_list_search"),

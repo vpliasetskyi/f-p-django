@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ custom_list.name }} — Cinemix{% endblock %}
+
+{% block content %}
+<div class="cx-cl-form" x-data="{ popupOpen: false }"
+     @open-item-popup.window="popupOpen = true"
+     @close-item-popup.window="popupOpen = false">
+
+  {# ── Header ─────────────────────────────────────────── #}
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px">
+    <div style="flex:1">
+      <h1 class="cx-page-title" style="margin-bottom:4px">{{ custom_list.name }}</h1>
+      <p class="cx-page-sub">{{ list_items|length }} title{{ list_items|length|pluralize }}</p>
+    </div>
+    <div style="display:flex;gap:10px">
+      <a href="{% url 'lists:custom_list_update' custom_list.pk %}" class="cx-btn cx-btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit List
+      </a>
+      <a href="{% url 'lists:my_list' %}" class="cx-btn cx-btn-secondary">Back to My Lists</a>
+    </div>
+  </div>
+
+  {# ── Items ─────────────────────────────────────────── #}
+  <div class="cx-cl-added-section">
+    <div id="cl-added-items">
+      {% include 'lists/partials/cl_added_items.html' %}
+    </div>
+  </div>
+
+  {# ── Item edit popup ───────────────────────────────────── #}
+  <div class="cx-cl-popup-overlay" x-show="popupOpen" x-cloak @click.self="popupOpen = false">
+    <div class="cx-cl-popup" id="cl-popup-content">
+      <!-- loaded via HTMX -->
+    </div>
+  </div>
+</div>
+{% endblock %}

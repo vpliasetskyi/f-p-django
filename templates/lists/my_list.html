@@ -127,7 +127,7 @@
         <div class="cx-list-card-count">{{ cl.list_items.count }} items</div>
       </div>
       <div style="display:flex;gap:6px">
-        <a href="{% url 'lists:custom_list_update' cl.pk %}" class="cx-btn-icon" title="Edit">
+        <a href="{% url 'lists:custom_list_update' cl.pk %}" class="cx-btn-icon" title="Edit list">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </a>
         <form id="del-{{ cl.pk }}" method="post" action="{% url 'lists:custom_list_delete' cl.pk %}" style="margin:0">{% csrf_token %}</form>
@@ -150,8 +150,8 @@
     </div>
     <div class="cx-list-card-foot">
       <span class="cx-list-card-recent">Updated {{ cl.updated_at|date:"M d" }}</span>
-      <a href="{% url 'lists:custom_list_update' cl.pk %}" class="cx-list-card-view">
-        Edit list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      <a href="{% url 'lists:custom_list_detail' cl.pk %}" class="cx-list-card-view">
+        View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       </a>
     </div>
   </div>
