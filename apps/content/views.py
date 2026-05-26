@@ -16,20 +16,21 @@ class HomeView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['highest_rated'] = ContentItem.objects.order_by('-vote_average')[:12]
-        raw = tmdb.discover_media(media_type='movie', year=2026)[:4]
-        context['slider_items'] = [
-            {
-                'backdrop_path': item.get('backdrop_path'),
-                'title': item.get('title') or item.get('name', ''),
-                'overview': item.get('overview', ''),
-                'vote_average': item.get('vote_average'),
-                'release_year': (item.get('release_date') or item.get('first_air_date') or '')[:4],
-                'tmdb_id': item.get('id'),
-                'contnt_type': item.get('contnt_type', 'movie'),
-                'type_display': 'Movie' if item.get('contnt_type') == 'movie' else 'TV Show',
-            }
-            for item in raw
-        ]
+        recent = list(ContentItem.objects.order_by('-created_at')[:4])
+        slider_items = []
+        for item in recent:
+            details = tmdb.get_details(item.tmdb_id, item.contnt_type) or {}
+            slider_items.append({
+                'backdrop_path': details.get('backdrop_path', ''),
+                'title': item.title,
+                'overview': item.overview,
+                'vote_average': item.vote_average,
+                'release_year': item.release_date.year if item.release_date else '',
+                'tmdb_id': item.tmdb_id,
+                'contnt_type': item.contnt_type,
+                'type_display': item.get_contnt_type_display(),
+            })
+        context['slider_items'] = slider_items
         return context
 
 
