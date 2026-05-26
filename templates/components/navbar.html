@@ -12,7 +12,7 @@
         <div class="cx-dropdown">
           <a href="{% url 'content:discover' %}?media_type=movie&year=2026" class="cx-dropdown-item">All Movies</a>
           <div class="cx-dropdown-divider"></div>
-          <a href="{% url 'content:discover' %}?media_type=movie&year=2026&sort_by=release_date.desc" class="cx-dropdown-item">Hot Releases</a>
+          <a href="{% url 'content:discover' %}?media_type=movie&year=2026&min_rating=6" class="cx-dropdown-item">Hot Releases</a>
           <a href="{% url 'content:discover' %}?media_type=movie&genre_id=28&min_rating=7" class="cx-dropdown-item">Action</a>
           <a href="{% url 'content:discover' %}?media_type=movie&min_rating=7" class="cx-dropdown-item">Popular</a>
         </div>
