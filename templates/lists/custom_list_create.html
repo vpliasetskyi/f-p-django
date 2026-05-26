@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}New List — Cinemix{% endblock %}
+
+{% block content %}
+<div class="cx-cl-form">
+  <form method="post">
+    {% csrf_token %}
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <input class="cx-cl-name-input" name="name"
+             placeholder="Name your list…" required maxlength="255"
+             style="flex:1;min-width:200px" autofocus>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="cx-btn cx-btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Create List
+        </button>
+        <a href="{% url 'lists:my_list' %}" class="cx-btn cx-btn-secondary">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
