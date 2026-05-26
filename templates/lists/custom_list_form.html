@@ -17,60 +17,54 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
           Save List
         </button>
+        {% if is_new %}
+        <form method="post" action="{% url 'lists:custom_list_delete' custom_list.pk %}" style="margin:0">
+          {% csrf_token %}
+          <button type="submit" class="cx-btn cx-btn-secondary">Cancel</button>
+        </form>
+        {% else %}
         <a href="{% url 'lists:my_list' %}" class="cx-btn cx-btn-secondary">Cancel</a>
+        {% endif %}
       </div>
     </div>
   </form>
 
   {# ── Search + filters ──────────────────────────────────── #}
-  <div class="cx-discover-form" style="margin-bottom:20px">
-    <div>
-      <label class="cx-discover-label">Title</label>
-      <input class="cx-discover-input" name="q" type="text" placeholder="Search by title…"
-             hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
-             hx-trigger="keyup changed delay:400ms"
-             hx-target="#cl-search-results"
-             hx-include="[name='year'],[name='country'],[name='min_rating'],[name='actor']"
-             autocomplete="off">
-    </div>
-    <div>
-      <label class="cx-discover-label">Year</label>
-      <input class="cx-discover-input" name="year" type="number" min="1900" max="2030" placeholder="Any"
-             hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
-             hx-trigger="keyup changed delay:600ms"
-             hx-target="#cl-search-results"
-             hx-include="[name='q'],[name='country'],[name='min_rating'],[name='actor']">
-    </div>
-    <div>
-      <label class="cx-discover-label">Country</label>
-      <input class="cx-discover-input" name="country" placeholder="e.g. US, KR" maxlength="4"
-             hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
-             hx-trigger="keyup changed delay:600ms"
-             hx-target="#cl-search-results"
-             hx-include="[name='q'],[name='year'],[name='min_rating'],[name='actor']">
-    </div>
-    <div>
-      <label class="cx-discover-label">Min Rating</label>
-      <select class="cx-discover-select" name="min_rating"
-              hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
-              hx-trigger="change"
-              hx-target="#cl-search-results"
-              hx-include="[name='q'],[name='year'],[name='country'],[name='actor']">
-        <option value="">Any</option>
-        <option value="5">5+</option>
-        <option value="6">6+</option>
-        <option value="7">7+</option>
-        <option value="8">8+</option>
-      </select>
-    </div>
-    <div>
-      <label class="cx-discover-label">Actor</label>
-      <input class="cx-discover-input" name="actor" placeholder="Actor name"
-             hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
-             hx-trigger="keyup changed delay:600ms"
-             hx-target="#cl-search-results"
-             hx-include="[name='q'],[name='year'],[name='country'],[name='min_rating']">
-    </div>
+  <div class="cx-cl-filter-bar">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input class="cx-cl-filter-input" style="flex:2;min-width:160px"
+           name="q" placeholder="Search by title…"
+           hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+           hx-trigger="keyup changed delay:400ms"
+           hx-target="#cl-search-results"
+           hx-include="[name='year'],[name='country'],[name='min_rating'],[name='actor']"
+           autocomplete="off">
+    <input class="cx-cl-filter-input" name="year" placeholder="Year" type="number" style="width:90px"
+           hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+           hx-trigger="keyup changed delay:600ms"
+           hx-target="#cl-search-results"
+           hx-include="[name='q'],[name='country'],[name='min_rating'],[name='actor']">
+    <input class="cx-cl-filter-input" name="country" placeholder="Country" maxlength="4" style="width:100px"
+           hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+           hx-trigger="keyup changed delay:600ms"
+           hx-target="#cl-search-results"
+           hx-include="[name='q'],[name='year'],[name='min_rating'],[name='actor']">
+    <select class="cx-cl-filter-input" name="min_rating" style="width:110px"
+            hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+            hx-trigger="change"
+            hx-target="#cl-search-results"
+            hx-include="[name='q'],[name='year'],[name='country'],[name='actor']">
+      <option value="">Any Rating</option>
+      <option value="5">5+</option>
+      <option value="6">6+</option>
+      <option value="7">7+</option>
+      <option value="8">8+</option>
+    </select>
+    <input class="cx-cl-filter-input" name="actor" placeholder="Actor name" style="width:150px"
+           hx-get="{% url 'lists:custom_list_search' custom_list.pk %}"
+           hx-trigger="keyup changed delay:600ms"
+           hx-target="#cl-search-results"
+           hx-include="[name='q'],[name='year'],[name='country'],[name='min_rating']">
   </div>
 
   {# ── Search results (HTMX target) ──────────────────────── #}

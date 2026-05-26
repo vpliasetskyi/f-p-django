@@ -4,7 +4,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from django.http import HttpResponse, Http404
-from datetime import datetime
+from django.utils import timezone
+from datetime import datetime, timedelta
 from .models import WatchItem, CustomList, CustomListItem
 from apps.content.models import ContentItem
 from apps.content import tmdb
@@ -42,6 +43,14 @@ class UserWatchListView(LoginRequiredMixin, ListView):
         context['watching_items'] = qs.filter(status='watching')
         context['completed_items'] = qs.filter(status='completed')
         context['rated_items'] = qs.filter(rating__isnull=False)
+        # Clean up orphan new lists: default name, no items, older than 30 min
+        cutoff = timezone.now() - timedelta(minutes=30)
+        CustomList.objects.filter(
+            user=self.request.user,
+            name='New List',
+            created_at__lt=cutoff,
+            list_items__isnull=True,
+        ).delete()
         context['custom_lists'] = CustomList.objects.filter(
             user=self.request.user
         ).prefetch_related('list_items__content_item').order_by('-updated_at')
@@ -109,7 +118,7 @@ class CloneWatchListView(LoginRequiredMixin, View):
 class CustomListCreateView(LoginRequiredMixin, View):
     def get(self, request):
         custom_list = CustomList.objects.create(user=request.user, name='New List')
-        return redirect('lists:custom_list_update', pk=custom_list.pk)
+        return redirect(f"{reverse_lazy('lists:custom_list_update', kwargs={'pk': custom_list.pk})}?new=1")
 
 
 class CustomListUpdateView(LoginRequiredMixin, View):
@@ -134,6 +143,7 @@ class CustomListUpdateView(LoginRequiredMixin, View):
             'custom_list': custom_list,
             'list_items': list_items,
             'watch_items_map': self._watch_items_map(request, list_items),
+            'is_new': request.GET.get('new') == '1',
         })
 
     def post(self, request, pk):
