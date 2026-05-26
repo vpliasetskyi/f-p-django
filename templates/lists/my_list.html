@@ -37,7 +37,7 @@
     </div>
     <div class="cx-list-card-foot">
       <span class="cx-list-card-recent">{{ plan_to_watch_items|length }} items</span>
-      <span class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+      <a href="{% url 'lists:default_list_detail' 'plan_to_watch' %}" class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></a>
     </div>
   </div>
 
@@ -61,7 +61,7 @@
     </div>
     <div class="cx-list-card-foot">
       <span class="cx-list-card-recent">{{ watching_items|length }} items</span>
-      <span class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+      <a href="{% url 'lists:default_list_detail' 'watching' %}" class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></a>
     </div>
   </div>
 
@@ -85,7 +85,7 @@
     </div>
     <div class="cx-list-card-foot">
       <span class="cx-list-card-recent">{{ completed_items|length }} items</span>
-      <span class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+      <a href="{% url 'lists:default_list_detail' 'completed' %}" class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></a>
     </div>
   </div>
 
@@ -109,7 +109,7 @@
     </div>
     <div class="cx-list-card-foot">
       <span class="cx-list-card-recent">{{ rated_items|length }} items</span>
-      <span class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
+      <a href="{% url 'lists:default_list_detail' 'rated' %}" class="cx-list-card-view">View list <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></a>
     </div>
   </div>
 </div>
