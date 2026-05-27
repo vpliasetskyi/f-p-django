@@ -37,6 +37,28 @@ def search_multi(query):
         logger.error(f"Error fetching from TMDB: {e}")
         return []
 
+def search_by_type(query, media_type='movie', count=24):
+    if not TMDB_API_KEY or not query:
+        return []
+    url = f"{TMDB_BASE_URL}/search/{media_type}"
+    results = []
+    for pg in range(1, 3):
+        params = {'api_key': TMDB_API_KEY, 'query': query, 'language': 'en-US', 'page': pg, 'include_adult': 'false'}
+        try:
+            response = httpx.get(url, params=params, timeout=5.0)
+            response.raise_for_status()
+            page_results = response.json().get('results', [])
+            for item in page_results:
+                item['contnt_type'] = media_type
+            results.extend(page_results)
+            if len(results) >= count:
+                break
+        except Exception as e:
+            logger.error(f"Error searching {media_type}: {e}")
+            break
+    return results[:count]
+
+
 def get_genres():
     if not TMDB_API_KEY:
         logger.warning("TMDB API Key is not set.")
@@ -85,7 +107,7 @@ def search_people(query):
         return None
 
 
-def discover_media(media_type='movie', year=None, country=None, genre_id=None, min_rating=None, page=1, with_people=None, sort_by=None):
+def discover_media(media_type='movie', year=None, country=None, genre_id=None, min_rating=None, page=1, with_people=None, sort_by=None, count=24):
     if not TMDB_API_KEY:
         logger.warning("TMDB API Key is not set.")
         return []
@@ -94,50 +116,55 @@ def discover_media(media_type='movie', year=None, country=None, genre_id=None, m
     actual_sort = sort_by or 'popularity.desc'
     if actual_sort == 'release_date.desc':
         actual_sort = 'primary_release_date.desc' if media_type == 'movie' else 'first_air_date.desc'
-    params = {
+
+    base_params = {
         'api_key': TMDB_API_KEY,
         'language': 'en-US',
         'sort_by': actual_sort,
-        'page': page,
         'include_adult': 'false',
     }
     if year:
         key = 'primary_release_year' if media_type == 'movie' else 'first_air_date_year'
-        params[key] = year
+        base_params[key] = year
     if country:
-        params['with_origin_country'] = country
+        base_params['with_origin_country'] = country
     if genre_id:
-        params['with_genres'] = genre_id
+        base_params['with_genres'] = genre_id
     if min_rating:
-        params['vote_average.gte'] = min_rating
+        base_params['vote_average.gte'] = min_rating
     if with_people:
-        params['with_people'] = with_people
+        base_params['with_people'] = with_people
 
-    try:
-        response = httpx.get(url, params=params, timeout=5.0)
-        response.raise_for_status()
-        results = response.json().get('results', [])
-        for item in results:
-            item['contnt_type'] = media_type
-        return results
-    except Exception as e:
-        logger.error(f"Error fetching discover results: {e}")
-        return []
+    results = []
+    for pg in range(page, page + 2):
+        try:
+            response = httpx.get(url, params={**base_params, 'page': pg}, timeout=5.0)
+            response.raise_for_status()
+            page_results = response.json().get('results', [])
+            for item in page_results:
+                item['contnt_type'] = media_type
+            results.extend(page_results)
+            if len(results) >= count:
+                break
+        except Exception as e:
+            logger.error(f"Error fetching discover results: {e}")
+            break
+    return results[:count]
 
 
 def get_videos(tmdb_id, content_type='movie'):
     if not TMDB_API_KEY:
         return None
     url = f"{TMDB_BASE_URL}/{content_type}/{tmdb_id}/videos"
-    params = {'api_key': TMDB_API_KEY, 'language': 'en-US'}
     try:
-        response = httpx.get(url, params=params, timeout=5.0)
+        response = httpx.get(url, params={'api_key': TMDB_API_KEY, 'language': 'en-US'}, timeout=5.0)
         response.raise_for_status()
-        results = response.json().get('results', [])
-        for video in results:
-            if video.get('site') == 'YouTube' and video.get('type') == 'Trailer':
-                return video.get('key')
-        return None
+        yt_results = [v for v in response.json().get('results', []) if v.get('site') == 'YouTube']
+        for preferred in ('Trailer', 'Teaser', 'Clip', 'Featurette'):
+            for video in yt_results:
+                if video.get('type') == preferred:
+                    return video.get('key')
+        return yt_results[0].get('key') if yt_results else None
     except Exception as e:
         logger.error(f"Error fetching videos: {e}")
         return None

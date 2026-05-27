@@ -177,17 +177,22 @@ class AdvancedSearchView(View):
         genre_id = request.GET.get('genre_id') or None
         min_rating = request.GET.get('min_rating') or None
         sort_by = request.GET.get('sort_by') or None
+        query = request.GET.get('q', '').strip()
+        page_label = request.GET.get('label', 'Discover')
 
         results = []
         if request.GET:
-            results = tmdb.discover_media(
-                media_type=media_type,
-                year=year,
-                country=country,
-                genre_id=genre_id,
-                min_rating=min_rating,
-                sort_by=sort_by,
-            )
+            if query:
+                results = tmdb.search_by_type(query, media_type)
+            else:
+                results = tmdb.discover_media(
+                    media_type=media_type,
+                    year=year,
+                    country=country,
+                    genre_id=genre_id,
+                    min_rating=min_rating,
+                    sort_by=sort_by,
+                )
 
         context = {
             'genres': unique_genres,
@@ -197,6 +202,8 @@ class AdvancedSearchView(View):
             'selected_country': country or '',
             'selected_genre_id': genre_id or '',
             'selected_min_rating': min_rating or '',
+            'selected_q': query,
+            'page_label': page_label,
         }
         return render(request, 'content/advanced_search.html', context)
 
@@ -207,13 +214,17 @@ class AdvancedSearchView(View):
         genre_id = request.POST.get('genre_id') or None
         min_rating = request.POST.get('min_rating') or None
         sort_by = request.POST.get('sort_by') or None
+        query = request.POST.get('q', '').strip()
 
-        results = tmdb.discover_media(
-            media_type=media_type,
-            year=year,
-            country=country,
-            genre_id=genre_id,
-            min_rating=min_rating,
-            sort_by=sort_by,
-        )
+        if query:
+            results = tmdb.search_by_type(query, media_type)
+        else:
+            results = tmdb.discover_media(
+                media_type=media_type,
+                year=year,
+                country=country,
+                genre_id=genre_id,
+                min_rating=min_rating,
+                sort_by=sort_by,
+            )
         return render(request, 'content/partials/discover_results.html', {'results': results})

@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Discover — Cinemix{% endblock %}
+{% block title %}{{ page_label }} — Cinemix{% endblock %}
 
 {% block content %}
 <div class="cx-page-head">
-  <h1 class="cx-page-title">Discover</h1>
-  <p class="cx-page-sub">Filter movies and TV shows by type, year, country, genre, and rating.</p>
+  <h1 class="cx-page-title">{{ page_label }}</h1>
+  <p class="cx-page-sub">Search by title or filter by type, year, country, genre, and rating.</p>
 </div>
 
 <form hx-post="{% url 'content:discover' %}"
@@ -12,6 +12,11 @@
       hx-swap="innerHTML"
       class="cx-discover-form">
   {% csrf_token %}
+  <div style="grid-column:span 2">
+    <label class="cx-discover-label">Search Title</label>
+    <input type="text" name="q" placeholder="e.g. Inception, Breaking Bad…"
+           class="cx-discover-input" value="{{ selected_q }}">
+  </div>
   <div>
     <label class="cx-discover-label">Type</label>
     <select name="media_type" class="cx-discover-select">

@@ -10,11 +10,11 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="cx-dropdown">
-          <a href="{% url 'content:discover' %}?media_type=movie&year=2026" class="cx-dropdown-item">All Movies</a>
+          <a href="{% url 'content:discover' %}?media_type=movie&year=2026&label=All+Movies" class="cx-dropdown-item">All Movies</a>
           <div class="cx-dropdown-divider"></div>
-          <a href="{% url 'content:discover' %}?media_type=movie&year=2026&min_rating=6" class="cx-dropdown-item">Hot Releases</a>
-          <a href="{% url 'content:discover' %}?media_type=movie&genre_id=28&min_rating=7" class="cx-dropdown-item">Action</a>
-          <a href="{% url 'content:discover' %}?media_type=movie&min_rating=7" class="cx-dropdown-item">Popular</a>
+          <a href="{% url 'content:discover' %}?media_type=movie&year=2026&min_rating=6&label=Hot+Releases" class="cx-dropdown-item">Hot Releases</a>
+          <a href="{% url 'content:discover' %}?media_type=movie&genre_id=28&min_rating=7&label=Action" class="cx-dropdown-item">Action</a>
+          <a href="{% url 'content:discover' %}?media_type=movie&min_rating=7&label=Popular+Movies" class="cx-dropdown-item">Popular</a>
         </div>
       </div>
 
@@ -25,16 +25,16 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="cx-dropdown">
-          <a href="{% url 'content:discover' %}?media_type=tv&year=2026" class="cx-dropdown-item">All TV Shows</a>
+          <a href="{% url 'content:discover' %}?media_type=tv&year=2026&label=All+TV+Shows" class="cx-dropdown-item">All TV Shows</a>
           <div class="cx-dropdown-divider"></div>
-          <a href="{% url 'content:discover' %}?media_type=tv&genre_id=16" class="cx-dropdown-item">Anime</a>
-          <a href="{% url 'content:discover' %}?media_type=tv&min_rating=7" class="cx-dropdown-item">Popular</a>
-          <a href="{% url 'content:discover' %}?media_type=tv&genre_id=10765" class="cx-dropdown-item">Sci-Fi &amp; Fantasy</a>
-          <a href="{% url 'content:discover' %}?media_type=tv&min_rating=8" class="cx-dropdown-item">Legendary</a>
+          <a href="{% url 'content:discover' %}?media_type=tv&genre_id=16&label=Anime" class="cx-dropdown-item">Anime</a>
+          <a href="{% url 'content:discover' %}?media_type=tv&min_rating=7&label=Popular+TV+Shows" class="cx-dropdown-item">Popular</a>
+          <a href="{% url 'content:discover' %}?media_type=tv&genre_id=10765&label=Sci-Fi+%26+Fantasy" class="cx-dropdown-item">Sci-Fi &amp; Fantasy</a>
+          <a href="{% url 'content:discover' %}?media_type=tv&min_rating=8&label=Legendary+TV" class="cx-dropdown-item">Legendary</a>
         </div>
       </div>
 
-      <a href="{% url 'content:discover' %}?media_type=movie&year=2026" class="cx-nav-item">Discover</a>
+      <a href="{% url 'content:discover' %}?media_type=movie&year=2026&label=Discover" class="cx-nav-item">Discover</a>
 
       {% if request.user.is_authenticated %}
       <a href="{% url 'lists:my_list' %}" class="cx-nav-item">My Lists</a>
