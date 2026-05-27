@@ -108,6 +108,7 @@ class CloneWatchListView(LoginRequiredMixin, View):
 
 class CustomListDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
+        from django.urls import reverse
         custom_list = get_object_or_404(CustomList, pk=pk, user=request.user)
         list_items = list(custom_list.list_items.select_related('content_item').all())
         watch_items_map = {
@@ -117,10 +118,14 @@ class CustomListDetailView(LoginRequiredMixin, View):
                 contnt_item__in=[li.content_item for li in list_items],
             )
         } if list_items else {}
+        public_url = request.build_absolute_uri(
+            reverse('lists:public_list', kwargs={'pk': custom_list.pk})
+        )
         return render(request, 'lists/custom_list_detail.html', {
             'custom_list': custom_list,
             'list_items': list_items,
             'watch_items_map': watch_items_map,
+            'public_url': public_url,
         })
 
 
@@ -396,6 +401,24 @@ class DefaultListRemoveItemView(LoginRequiredMixin, View):
             'status_label': _DEFAULT_LIST_LABELS[status],
             'items': items,
         })
+
+
+class PublicCustomListView(View):
+    def get(self, request, pk):
+        custom_list = get_object_or_404(CustomList, pk=pk, is_public=True)
+        list_items = list(custom_list.list_items.select_related('content_item').all())
+        return render(request, 'lists/public_list_detail.html', {
+            'custom_list': custom_list,
+            'list_items': list_items,
+        })
+
+
+class CustomListTogglePublicView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        custom_list = get_object_or_404(CustomList, pk=pk, user=request.user)
+        custom_list.is_public = not custom_list.is_public
+        custom_list.save(update_fields=['is_public'])
+        return redirect('lists:custom_list_detail', pk=pk)
 
 
 class AddToListView(LoginRequiredMixin, View):

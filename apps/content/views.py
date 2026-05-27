@@ -154,6 +154,8 @@ class ContentDetailView(DetailView):
             context['director'] = ''
             context['cast'] = []
 
+        context['trailer_key'] = tmdb.get_videos(item.tmdb_id, item.contnt_type)
+
         if self.request.user.is_authenticated:
             from apps.lists.models import WatchItem
             context['watch_item'] = WatchItem.objects.filter(

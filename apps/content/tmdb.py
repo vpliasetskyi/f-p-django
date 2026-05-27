@@ -125,6 +125,24 @@ def discover_media(media_type='movie', year=None, country=None, genre_id=None, m
         return []
 
 
+def get_videos(tmdb_id, content_type='movie'):
+    if not TMDB_API_KEY:
+        return None
+    url = f"{TMDB_BASE_URL}/{content_type}/{tmdb_id}/videos"
+    params = {'api_key': TMDB_API_KEY, 'language': 'en-US'}
+    try:
+        response = httpx.get(url, params=params, timeout=5.0)
+        response.raise_for_status()
+        results = response.json().get('results', [])
+        for video in results:
+            if video.get('site') == 'YouTube' and video.get('type') == 'Trailer':
+                return video.get('key')
+        return None
+    except Exception as e:
+        logger.error(f"Error fetching videos: {e}")
+        return None
+
+
 def get_details(tmdb_id, content_type='movie'):
     if not TMDB_API_KEY:
         logger.warning("TMDB API Key is not set.")

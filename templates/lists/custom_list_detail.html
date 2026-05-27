@@ -10,9 +10,60 @@
   <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px">
     <div style="flex:1">
       <h1 class="cx-page-title" style="margin-bottom:4px">{{ custom_list.name }}</h1>
-      <p class="cx-page-sub">{{ list_items|length }} title{{ list_items|length|pluralize }}</p>
+      <p class="cx-page-sub">{{ list_items|length }} title{{ list_items|length|pluralize }}
+        {% if custom_list.is_public %}<span style="margin-left:8px;color:var(--accent-mint);font-size:12px">&#x25CF; Public</span>{% endif %}
+      </p>
     </div>
-    <div style="display:flex;gap:10px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      {# ── Toggle public/private ──────────────────────── #}
+      <form method="post" action="{% url 'lists:custom_list_toggle_public' custom_list.pk %}">
+        {% csrf_token %}
+        {% if custom_list.is_public %}
+          <button type="submit" class="cx-btn cx-btn-secondary" title="Make this list private">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-9.5 9.5L7 11l10-10z"/><path d="M7 11l-5 5v4h4l5-5"/></svg>
+            Make Private
+          </button>
+        {% else %}
+          <button type="submit" class="cx-btn cx-btn-secondary" title="Make this list public so you can share it">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Make Public
+          </button>
+        {% endif %}
+      </form>
+
+      {# ── Share buttons (only when public) ──────────── #}
+      {% if custom_list.is_public %}
+      <div x-data="{ copied: false }" style="display:flex;gap:8px;align-items:center">
+        {# Twitter/X #}
+        <a href="https://twitter.com/intent/tweet?text=Check+out+my+list+%22{{ custom_list.name|urlencode }}%22+on+Cinemix&url={{ public_url|urlencode }}"
+           target="_blank" rel="noopener"
+           class="cx-btn cx-btn-secondary"
+           title="Share on X / Twitter"
+           style="padding:8px 10px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.264 5.633 5.9-5.633zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        {# Facebook #}
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ public_url|urlencode }}"
+           target="_blank" rel="noopener"
+           class="cx-btn cx-btn-secondary"
+           title="Share on Facebook"
+           style="padding:8px 10px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        {# Copy link #}
+        <button type="button"
+                class="cx-btn cx-btn-secondary"
+                title="Copy link"
+                style="padding:8px 10px"
+                @click="navigator.clipboard.writeText('{{ public_url }}').then(() => { copied = true; setTimeout(() => copied = false, 2000) })">
+          <span x-show="!copied">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </span>
+          <span x-show="copied" style="color:var(--accent-mint);font-size:12px">Copied!</span>
+        </button>
+      </div>
+      {% endif %}
+
       <a href="{% url 'lists:custom_list_update' custom_list.pk %}" class="cx-btn cx-btn-secondary">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Edit List

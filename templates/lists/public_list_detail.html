@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}{{ custom_list.name }} — Cinemix{% endblock %}
+
+{% block content %}
+<div class="cx-cl-form">
+
+  {# ── Header ─────────────────────────────────────────── #}
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px">
+    <div style="flex:1">
+      <h1 class="cx-page-title" style="margin-bottom:4px">{{ custom_list.name }}</h1>
+      <p class="cx-page-sub">
+        Curated by <strong>{{ custom_list.user.username }}</strong> &middot;
+        {{ list_items|length }} title{{ list_items|length|pluralize }}
+      </p>
+    </div>
+    <a href="{% url 'content:home' %}" class="cx-btn cx-btn-secondary">← Back to Home</a>
+  </div>
+
+  {# ── Items grid ─────────────────────────────────────── #}
+  {% if list_items %}
+  <div class="cx-cl-added-list">
+    {% for li in list_items %}
+    {% with item=li.content_item %}
+    <div class="cx-cl-added-item">
+      <a href="{% url 'content:detail' item.tmdb_id %}?type={{ item.contnt_type }}" style="display:flex;gap:14px;text-decoration:none;flex:1">
+        <div class="cx-cl-added-poster">
+          {% if li.custom_poster %}
+            <img src="{{ li.custom_poster.url }}" alt="{{ item.title }}">
+          {% elif item.poster_path %}
+            <img src="https://image.tmdb.org/t/p/w92{{ item.poster_path }}" alt="{{ item.title }}">
+          {% elif item.custom_poster %}
+            <img src="{{ item.custom_poster.url }}" alt="{{ item.title }}">
+          {% else %}
+            <div class="cx-poster-placeholder" style="width:56px;height:84px;font-size:10px">{{ item.title|truncatechars:10 }}</div>
+          {% endif %}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="cx-cl-added-title">{{ li.custom_title|default:item.title }}</div>
+          <div class="cx-cl-added-meta">
+            {{ item.get_contnt_type_display }}
+            {% if item.release_date %}&middot; {{ item.release_date|date:"Y" }}{% endif %}
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:80px 0;color:var(--text-3)">
+    <p>This list is empty.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
